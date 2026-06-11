@@ -15,8 +15,8 @@ PcidV1:
     - **최소 길이:** ISO 15118 규격을 존중하여 최소 17자를 유지합니다.
 ProviderIdV1:
   type: string
-  pattern: '^[A-Z]{3}$'
-  description: "CPO 또는 서비스 제공자(Provider)를 식별하는 3자리 영문 대문자 코드입니다. 각 사업자에게 고유하게 할당됩니다."
+  pattern: '^[A-Z0-9]{3}$'
+  description: "CPO 또는 서비스 제공자(Provider)를 식별하는 3자리 영문 대문자 및 숫자 코드입니다. 각 사업자에게 고유하게 할당됩니다."
 EmaidV1: 
   type: string
   pattern: '^[A-Z]{2}[-][A-Z0-9]{3}[-][A-Z0-9]{6,29}([-][A-Z0-9]{1})?$'
