@@ -1,0 +1,389 @@
+/ccp/contract-data/emaid/{emaid}:
+  get:
+    tags: ["CCP (Contract Certificate Pool)"]
+    summary: eMAID 기준 계약 조회 (관리용)
+    operationId: getContractDataByEmaidV1
+    description: |
+      특정 eMAID에 매핑된 모든 계약 정보의 상태와 메타데이터를 조회합니다. 
+      CCP는 CPS(Contract Provisioning Service)에 의해 관리되는 수동적 저장소(Passive Pool)로서, 서명된 계약 데이터의 생애주기는 CPS의 비즈니스 로직에 종속됩니다.
+
+      **[역할 및 용도 분리: Management API]**
+      본 API는 ISO 15118 실시간 메시지 처리 흐름(In-band process) 외부에서 사용자의 계약 보유 현황을 조회하거나 사후 정산/관리 모니터링 목적으로 활용되는 **관리용 인터페이스**입니다. 
+      반환되는 데이터는 JSON 형식의 메타데이터이며, 실시간 계약 설치(CertificateInstallation) 과정에서 필요한 EXI 바이너리 덩어리가 아닙니다.
+
+      실시간 계약 설치 과정이나 차량 Push용 데이터가 필요한 경우 본 API 대신 반드시 **Protocol API**(`POST /ccp/signed-contract-data` 또는 `GET /ccp/signed-contract-data/{emaid}/{pcid}`)를 사용해야 합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: emaid
+        in: path
+        required: true
+        description: "조회 대상 eMAID입니다. ISO 15118-2/20 규격에 따른 'KR-KHL-C12345678' 형식을 준수해야 합니다."
+        schema: { $ref: '../components/schemas/index.yaml#/EmaidV1' }
+      - name: xsdMsgDefNamespace
+        in: query
+        description: "ISO 15118 메시지 버전 네임스페이스입니다. (예: urn:iso:15118:2:2013:MsgDef)"
+        schema: { $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1' }
+      - name: cpsV2GRootCertificateFingerprint
+        in: query
+        description: "특정 V2G Root를 신뢰 앵커로 하는 CPS에 의해 서명된 계약만 필터링할 때 사용하는 SHA-256 지문입니다. 차량이 신뢰하는 Root 지문과 대조하여 유효한 계약을 필터링할 수 있습니다."
+        schema: { type: string, pattern: '^[0-9a-fA-F]{64}$' }
+      - $ref: '../components/parameters/index.yaml#/offset'
+      - $ref: '../components/parameters/index.yaml#/limit'
+    responses:
+      '200':
+        description: "계약 정보 조회가 성공적으로 완료되었습니다. 결과가 없는 경우 빈 목록이 반환됩니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/index.yaml#/Pagination'
+                - $ref: '../components/schemas/index.yaml#/ContractDataCollectionV1'
+      '400': 
+        description: "잘못된 파라미터 요청입니다. eMAID 형식이 올바르지 않거나 필수 헤더가 누락된 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다. 유효하지 않은 인증 정보이거나 신뢰할 수 없는 클라이언트인 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "권한 부족입니다. 해당 eMAID 정보를 조회할 권한이 없는 파티(Party)인 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "조회 대상 eMAID를 시스템 내에서 찾을 수 없는 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "서버 내부 오류입니다. KPNC 시스템 연동 중 일시적인 장애가 발생한 경우입니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Search by eMAID'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/ccp/contract-data/emaid/KR-KHL-C12345678" \
+            -H "KPNC-From-Party-Type: cpo" \
+            -H "KPNC-From-Party-Id: KR-CPO-GRID01" \
+            -H "Accept: application/json"
+
+/ccp/contract-data/pcid/{pcid}:
+  get:
+    tags: ["CCP (Contract Certificate Pool)"]
+    summary: PCID 기준 계약 조회 (관리용)
+    operationId: getContractDataByPcidV1
+    description: |
+      특정 차량의 식별값(PCID)에 매핑된 모든 계약 정보를 조회합니다.
+      차량 제조사(OEM)가 자사 차량에 할당된 계약 목록을 관리하고 최신 상태를 유지하기 위해 이 엔드포인트를 사용합니다.
+      특히 OEM은 차량이 충전기에 연결되었을 때 해당 차량에 유효한 계약이 CCP에 존재하는지 확인하거나, 주기적인 동기화를 통해 계약 수명 주기(Lifecycle)를 관리하는 용도로 활용할 수 있습니다.
+      **[Management API]** 본 API는 관리용 메타데이터 조회를 위한 인터페이스입니다.
+      ISO 15118-2/20의 계약 발급 및 설치 과정에서 차량-계약 매핑 상태를 확인하는 데 필수적인 API입니다.
+      모든 통신은 국가 표준에 따라 보안이 유지되어야 합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: pcid
+        in: path
+        required: true
+        description: "차량의 고유 식별자인 PCID입니다. PnC협의체 합의에 따라 17~255자의 문자열을 허용합니다."
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+      - name: xsdMsgDefNamespace
+        in: query
+        description: "ISO 15118 메시지 버전 네임스페이스입니다. (예: urn:iso:15118:2:2013:MsgDef)"
+        schema: { $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1' }
+      - $ref: '../components/parameters/index.yaml#/offset'
+      - $ref: '../components/parameters/index.yaml#/limit'
+    responses:
+      '200':
+        description: "차량에 매핑된 계약 목록 조회가 성공하였습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/index.yaml#/Pagination'
+                - $ref: '../components/schemas/index.yaml#/ContractDataCollectionV1'
+      '400': 
+        description: "잘못된 파라미터 요청입니다. PCID 형식이 규격에 맞지 않는 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "조회 권한이 없습니다. CPO, eMSP 등 해당 차량의 계약 정보를 조회할 권한이 없는 파티의 요청입니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "해당 PCID를 사용하는 차량 정보가 CCP 또는 PCP에 등록되어 있지 않은 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "KPNC 백엔드 서비스 오류입니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Search by PCID'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/ccp/contract-data/pcid/KRMOTORS1234567890" \
+            -H "KPNC-From-Party-Type: oem" \
+            -H "KPNC-From-Party-Id: KR-OEM-MOTORS"
+
+/ccp/signed-contract-data:
+  post:
+    tags: ["CCP (Contract Certificate Pool)"]
+    summary: CertInstReq 기반 검색 (CPO용)
+    operationId: lookupSignedContractDataByReqV1
+    description: |
+      ISO 15118의 CertificateInstallationRequest 메시지를 기반으로 즉시 설치 가능한 서명된 계약 데이터를 조회합니다.
+      충전기(EVSE)로부터 받은 EXI 스트림(Base64 인코딩)을 전달하면, CCP는 내부의 계약들과 대조하여 해당 차량에 적합한 CertificateInstallationRes를 생성하여 반환합니다.
+      이 과정은 CPO 백엔드가 ISO 15118-2/20 프로토콜의 중계자 역할을 수행할 때 핵심적인 단계입니다.
+      반환되는 데이터에는 V2G 신뢰 체계(CPS)로부터 서명된 계약 인증서 체인과 암호화된 프라이빗 키 정보가 포함되어 있어, 차량이 즉시 계약을 설치할 수 있게 합니다.
+
+      **[속도 제한 정책]**
+      본 API는 실시간 충전 시나리오의 가용성 보장을 위해 엄격한 속도 제한이 적용됩니다. 
+      - **기본 제한:** 파티당 분당 최대 100회 요청 (예시)
+      - **임계값 초과:** HTTP 429 오류가 반환되며, 응답 헤더의 `KPNC-Rate-Limit-*` 필드를 통해 상세 제한 상태를 확인할 수 있습니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Always-Return-Exi'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [certificateInstallationReq, xsdMsgDefNamespace, providerId]
+            properties:
+              certificateInstallationReq: 
+                type: string
+                description: |
+                  ISO 15118 `certificateInstallationReq` 메시지의 Base64 인코딩된 EXI 본문입니다.
+                  
+                  - **인코딩:** Base64 (EXI Binary)
+                  - **표준 참조:** ISO 15118-2/20 `certificateInstallationReq`
+              xsdMsgDefNamespace: 
+                $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1'
+              providerId:
+                $ref: '../components/schemas/index.yaml#/ProviderIdV1'
+              metadata: 
+                type: string
+                description: "조회 요청과 관련된 추가 메타데이터입니다 (Optional)."
+    responses:
+      '200':
+        description: "조건에 부합하는 서명된 계약 데이터를 찾았습니다. CertificateInstallationRes 본문이 포함됩니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/index.yaml#/SignedContractDataCollectionV1'
+      '400': 
+        description: "전달된 EXI 데이터가 손상되었거나 ISO 15118 스키마를 준수하지 않습니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다. 유효하지 않은 인증 정보이거나 신뢰할 수 없는 클라이언트인 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "CPO 권한이 없는 파티가 요청했거나, 접근이 차단된 경우입니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "요청된 eMAID/PCID 조합에 해당하는 활성 계약이 CCP에 존재하지 않습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "EXI 디코딩 또는 계약 서명 데이터 생성 중 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'ISO 15118 Request'
+        source: |
+          curl -X POST "https://api.kpnc-protocol.kr/v1/ccp/signed-contract-data" \
+            -H "KPNC-From-Party-Type: cpo" \
+            -H "KPNC-From-Party-Id: KR-CPO-GRID01" \
+            -H "KPNC-Trace-Id: 550e8400-e29b-41d4-a716-446655440000" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "certificateInstallationReq": "gJgA...", 
+              "xsdMsgDefNamespace": "urn:iso:15118:20:2020:MsgDef",
+              "providerId": "KHL"
+            }'
+      - lang: 'cURL'
+        label: 'Invalid EXI Error'
+        source: |
+          curl -X POST "https://api.kpnc-protocol.kr/v1/ccp/signed-contract-data" \
+            -H "KPNC-From-Party-Type: cpo" \
+            -H "KPNC-From-Party-Id: KR-CPO-GRID01" \
+            -H "KPNC-Trace-Id: 550e8400-e29b-41d4-a716-446655440000" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "certificateInstallationReq": "INVALID", 
+              "xsdMsgDefNamespace": "urn:iso:15118:2:2013:MsgDef",
+              "providerId": "KHL"
+            }'
+
+/ccp/signed-contract-data/{emaid}:
+  delete:
+    tags: ["CCP (Contract Certificate Pool)"]
+    summary: 계약 게시 철회 및 데이터 삭제
+    operationId: deleteSignedContractDataByEmaidV1
+    description: |
+      특정 eMAID와 연결된 서명된 계약 데이터를 CCP에서 완전히 삭제하여 외부(CPO, OEM) 조회를 차단합니다.
+
+      본 API는 "게시 철회"의 역할을 수행하며, 인증서 자체의 효력을 정지시키는 "폐지"는 수행하지 않습니다.
+      사용자가 서비스를 일시 중단하거나, 단순 데이터 정합성 오류로 인해 저장소에서 데이터를 치워야 할 때 사용합니다.
+      인증서 폐지를 포함한 완전한 서비스 종료는 eMSP 서비스의 `Managed Revocation` API를 사용해야 합니다.
+
+      **[데이터 생애주기 참고]**
+      - PCP에서 특정 차량의 Provisioning 인증서가 삭제될 경우, 해당 PCID와 연결된 CCP 내의 모든 서명된 계약 데이터는 본 API와 동일하게 시스템에 의해 자동으로 삭제(Cleansing)됩니다.
+      - 본 API 호출 후에도 인증서 자체는 폐지되지 않았으므로, 동일한 인증서 번들로 다시 서명하여 게시할 수 있습니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: emaid
+        in: path
+        required: true
+        description: "게시를 철회할 계약의 eMAID입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/EmaidV1' }
+    responses:
+      '204': 
+        description: "CCP에서 계약 데이터 게시 철회 및 삭제가 완료되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+      '400': 
+        description: "잘못된 요청 형식입니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "계약 소유자가 아니거나 삭제 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "삭제하려는 eMAID가 CCP 내에 존재하지 않습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "삭제 처리 중 내부 시스템 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Unpublish Contract (eMSP)'
+        source: |
+          curl -X DELETE "https://api.kpnc-protocol.kr/v1/ccp/signed-contract-data/KR-KHL-C12345678" \
+            -H "KPNC-From-Party-Type: emsp" \
+            -H "KPNC-From-Party-Id: KR-EMSP-EMSP01" \
+            -H "KPNC-Trace-Id: 550e8400-e29b-41d4-a716-446655440000"
+      - lang: 'cURL'
+        label: 'Unpublish Contract (Operator)'
+        source: |
+          curl -X DELETE "https://api.kpnc-protocol.kr/v1/ccp/signed-contract-data/KR-KHL-C12345678" \
+            -H "KPNC-From-Party-Type: operator" \
+            -H "KPNC-From-Party-Id: KR-KPNC-OPERATOR" \
+            -H "KPNC-Trace-Id: 550e8400-e29b-41d4-a716-446655440000"
+
+/ccp/signed-contract-data/{emaid}/{pcid}:
+  get:
+    tags: ["CCP (Contract Certificate Pool)"]
+    summary: 서명된 계약 데이터 조회 (OEM용)
+    operationId: getSignedContractDataByEmaidAndPcidV1
+    description: |
+      특정 eMAID와 PCID의 조합으로 서명된 계약 데이터를 조회합니다.
+      주로 OEM 백엔드가 자사 차량(PCID)에 할당된 특정 사용자의 계약을 서버 간 통신(S2S)을 통해 가져올 때 사용합니다.
+
+      **복합 식별자({emaid}/{pcid}) 사용 사유:**
+      ISO 15118 표준에서 '서명된 계약 데이터(EXI)'는 단순히 계약(eMAID)의 상태 정보가 아니라, 해당 계약을 설치할 **특정 차량(PCID)의 Provisioning 인증서로 암호화**되어 생성된 물리적 데이터 덩어리입니다. 
+      동일한 계약(eMAID)이라 하더라도 대상 차량(PCID)이 다르면 데이터의 내용(EXI 스트림) 자체가 완전히 달라지므로, 차량과 계약의 쌍을 고유 리소스로 취급하여 관리합니다.
+
+      **응답 형식에 관한 참고:**
+      본 API는 ISO 15118-20 규격의 '다중 계약 설치/갱신' 시나리오에 대비하여 단건 조회임에도 컬렉션(배열) 형식을 반환합니다. 
+      ISO 15118-2 환경에서는 일반적으로 조건에 부합하는 1건의 데이터만 배열에 포함되어 반환됩니다.
+
+      요청 시 'sessionId' 파라미터를 제공하면, 반환되는 EXI 응답 내에 해당 세션 ID가 포함되어 차량과의 보안 세션 연결을 보장할 수 있습니다.
+      이 API는 차량 제조사가 사용자의 요청에 따라 계약 데이터를 사전 다운로드(Push model)할 때 핵심적인 역할을 수행합니다.
+      보안을 위해 eMAID와 PCID의 소유권 및 매핑 관계를 엄격히 검증합니다.
+
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: emaid
+        in: path
+        required: true
+        description: "조회할 계약의 eMAID입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/EmaidV1' }
+      - name: pcid
+        in: path
+        required: true
+        description: "차량 고유 식별자(PCID)입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+      - name: sessionId
+        in: query
+        required: false
+        schema: { type: string, pattern: '^[0-9a-fA-F]{16}$' }
+        description: |
+          EXI 내부에 포함할 세션 ID입니다. ISO 15118 규격에 따라 8바이트(16진수 16자) HEX 형식으로 제공되어야 합니다.
+          파라미터 누락 시(예: 차량 연결 전 사전 다운로드 시나리오), 시스템은 표준에 따른 임의의 값을 생성하거나 기본 세션 ID를 사용하여 EXI를 구성합니다.
+      - name: xsdMsgDefNamespace
+        in: query
+        description: "ISO 15118 메시지 버전 네임스페이스입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1' }
+      - name: cpsV2GRootCertificateFingerprint
+        in: query
+        description: "특정 CPS에 의해 처리된 데이터를 필터링하기 위한 SHA-256 지문입니다."
+        schema: { type: string }
+    responses:
+      '200':
+        description: "매칭되는 서명된 계약 데이터가 조회되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/index.yaml#/SignedContractDataCollectionV1'
+      '400': 
+        description: "잘못된 요청 파라미터입니다. eMAID, PCID 또는 sessionId 형식이 유효하지 않은 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "OEM/Operator 권한이 없거나 요청한 데이터에 접근할 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "지정한 eMAID 및 PCID 조합에 해당하는 계약 데이터를 찾을 수 없습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "시스템 오류입니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'OEM Contract Fetch'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/ccp/signed-contract-data/KR-KHL-C12345678/KRMOTORS1234567890?sessionId=0123456789ABCDEF" \
+            -H "KPNC-From-Party-Type: oem" \
+            -H "KPNC-From-Party-Id: KR-OEM-MOTORS"
