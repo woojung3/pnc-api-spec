@@ -218,18 +218,75 @@ SignedContractDataV1:
     cpsV2GRootDistinguishedName: { type: string, pattern: '^((CN|OU|O|C|DC|ST)=[^,]+,? ?)+$' }
     metadata: { type: string }
 
+PnCErrorTypeV1:
+  type: string
+  description: "문제 유형을 식별하는 고유 식별자(URN)입니다. 연동사는 본 값을 기반으로 기계적인 분기 처리를 수행해야 합니다."
+  enum:
+    - urn:pnc:error:common:parameter-invalid
+    - urn:pnc:error:common:unauthorized
+    - urn:pnc:error:common:access-denied
+    - urn:pnc:error:common:resource-not-found
+    - urn:pnc:error:common:already-exists
+    - urn:pnc:error:common:internal-error
+    - urn:pnc:error:rcp:invalid-root-cert
+    - urn:pnc:error:rcp:root-cert-expired
+    - urn:pnc:error:rcp:no-valid-root-found
+    - urn:pnc:error:rcp:delete-not-allowed
+    - urn:pnc:error:pcp:invalid-pcid
+    - urn:pnc:error:pcp:cert-format-invalid
+    - urn:pnc:error:pcp:cert-mismatch
+    - urn:pnc:error:pcp:prov-cert-not-found
+    - urn:pnc:error:pcp:storage-failure
+    - urn:pnc:error:ccp:invalid-emaid
+    - urn:pnc:error:ccp:contract-already-exists
+    - urn:pnc:error:ccp:mapping-mismatch
+    - urn:pnc:error:ccp:certificate-unavailable
+    - urn:pnc:error:ccp:invalid-exi-format
+    - urn:pnc:error:ccp:query-failure
+    - urn:pnc:error:cps:signing-failure
+    - urn:pnc:error:cps:engine-error
+    - urn:pnc:error:cps:revocation-not-allowed
+    - urn:pnc:error:pki:invalid-csr
+    - urn:pnc:error:pki:csr-verification-failed
+    - urn:pnc:error:pki:policy-violation
+    - urn:pnc:error:pki:validity-out-of-range
+    - urn:pnc:error:pki:sub-ca-unavailable
+    - urn:pnc:error:pki:revocation-error
+    - urn:pnc:error:event:delivery-failure
+    - urn:pnc:error:event:endpoint-unavailable
+    - urn:pnc:error:system:unknown
+
 ProblemDetailV1:
   type: object
   required: [type, title, status, detail]
   properties:
-    type: { type: string, format: uri, default: "about:blank" }
-    title: { type: string, minLength: 1 }
-    status: { type: integer, minimum: 100, maximum: 599 }
-    detail: { type: string, minLength: 1 }
-    instance: { type: string, format: uri }
-    errorCode: { type: string, minLength: 1 }
-    errorMessages: { type: array, items: { type: string, minLength: 1 } }
-    timestamp: { type: string, format: date-time }
+    type: 
+      $ref: '#/PnCErrorTypeV1'
+    title: 
+      type: string
+      minLength: 1
+      description: "에러 유형에 대한 요약입니다 (인간 판독용)."
+    status: 
+      type: integer
+      minimum: 100
+      maximum: 599
+      description: "발생한 에러에 적합한 HTTP 상태 코드입니다."
+    detail: 
+      type: string
+      minLength: 1
+      description: "에러 발생 원인에 대한 상세한 설명입니다."
+    instance: 
+      type: string
+      format: uri
+      description: "에러가 발생한 구체적인 리소스 식별자입니다."
+    errorMessages: 
+      type: array
+      items: { type: string, minLength: 1 }
+      description: "검증 에러 등 여러 사유가 겹칠 경우 상세 메시지 목록을 담습니다."
+    timestamp: 
+      type: string
+      format: date-time
+      description: "에러 발생 시각입니다."
 
 WebhookEndpointResV1:
   type: object

@@ -50,7 +50,14 @@
         $ref: '../components/responses/index.yaml#/NotFound'
       '409':
         description: "이미 해당 eMAID로 활성화된 계약이 존재합니다."
-        $ref: '../components/responses/index.yaml#/Conflict'
+        content:
+          application/problem+json:
+            schema: { $ref: '../components/schemas/index.yaml#/ProblemDetailV1' }
+            example:
+              type: "urn:pnc:error:ccp:contract-already-exists"
+              title: "Conflict"
+              status: 409
+              detail: "해당 eMAID로 이미 유효한 계약이 등록되어 있습니다. 기존 계약을 폐지하거나 새 eMAID를 사용하십시오."
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500':

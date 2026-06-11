@@ -47,7 +47,14 @@
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400': 
         description: "잘못된 요청 데이터입니다. PCID 형식이 유효하지 않거나 인증서 체인이 손상된 경우 발생합니다."
-        $ref: '../components/responses/index.yaml#/BadRequest'
+        content:
+          application/problem+json:
+            schema: { $ref: '../components/schemas/index.yaml#/ProblemDetailV1' }
+            example:
+              type: "urn:pnc:error:pcp:invalid-pcid"
+              title: "Bad Request"
+              status: 400
+              detail: "제공된 PCID의 체크섬이 올바르지 않거나 허용되지 않은 WMI를 포함하고 있습니다."
       '401': 
         description: "인증 정보가 유효하지 않거나 누락되었습니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
