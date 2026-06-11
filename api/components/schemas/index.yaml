@@ -466,7 +466,9 @@ EnrollmentRequestV1:
     caDomain:
       type: string
       enum: [emsp, cpo, oem, cps, veh]
-      description: "인증서를 발급받을 PKI 도메인입니다."
+      description: |
+        인증서를 발급받을 PKI 도메인임.
+        참고: v2g 도메인은 보안 정책상 온라인 발급 요청 대상에서 제외됨.
     iso15118Version:
       $ref: '#/XsdMsgDefNamespaceV1'
     certificateSigningRequest:
