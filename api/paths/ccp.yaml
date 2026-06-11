@@ -271,12 +271,12 @@
       '400': 
         description: "잘못된 요청 형식입니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
-      '403': 
-        description: "계약 소유자가 아니거나 삭제 권한이 없습니다."
-        $ref: '../components/responses/index.yaml#/Forbidden'
       '401': 
         description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "계약 소유자가 아니거나 삭제 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
         description: "삭제하려는 eMAID가 CCP 내에 존재하지 않습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
