@@ -359,8 +359,20 @@ ManagedContractRequestV1:
   properties:
     pcid: { $ref: '#/PcidV1' }
     emaid: { $ref: '#/EmaidV1' }
-    certificateValidFrom: { type: string, format: date-time, description: "계약 시작 일시" }
-    certificateValidTo: { type: string, format: date-time, description: "계약 만료 일시" }
+    certificateValidFrom:
+      type: string
+      format: date-time
+      description: |
+        계약 인증서의 유효 시작 일시입니다. 과거 날짜 입력은 허용되지 않으며, 
+        입력된 날짜가 서버 수신 시각보다 이전인 경우 서버 정책에 따라 현재 시각으로 자동 조정될 수 있습니다.
+    certificateValidTo:
+      type: string
+      format: date-time
+      description: |
+        계약 인증서의 만료 예정 일시입니다. ISO 15118 표준에 따라 해당 PCID의 
+        Provisioning 인증서 유효 기간을 초과할 수 없으며, PKI 시스템 정책상 허용되는 
+        최대 유효 기간(예: 발급일로부터 최대 2년) 내로 설정해야 합니다. 
+        제약 조건을 위반한 요청에 대해서는 400 Bad Request를 반환합니다.
     xsdMsgDefNamespace: { $ref: '#/XsdMsgDefNamespaceV1' }
     subscriptionUrl: { type: string, format: uri, description: "추가 정보 교환을 위한 eMSP측 구독 URL (Optional)" }
 
