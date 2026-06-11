@@ -61,7 +61,7 @@
             -H "KPNC-From-Party-Type: emsp" \
             -H "KPNC-From-Party-Id: KR-EMSP-EMSP01"
 
-/pki/enroll-certificate:
+/pki/certificates:
   post:
     tags: ["PKI (Public Key Infrastructure)"]
     summary: 클라이언트 인증서 발급
@@ -111,7 +111,7 @@
       - lang: 'cURL'
         label: 'Enroll Certificate'
         source: |
-          curl -X POST "https://api.kpnc-protocol.kr/v1/pki/enroll-certificate" \
+          curl -X POST "https://api.kpnc-protocol.kr/v1/pki/certificates" \
             -H "KPNC-From-Party-Type: cpo" \
             -H "KPNC-From-Party-Id: KR-CPO-01" \
             -H "Content-Type: application/json" \
@@ -121,14 +121,14 @@
               "certificateSigningRequest": "MIIB...[Base64 CSR]..."
             }'
 
-/pki/revoke-certificate:
-  post:
+/pki/certificates/{caDomain}/{certificateSerialNumber}:
+  delete:
     tags: ["PKI (Public Key Infrastructure)"]
     summary: 인증서 폐지 요청
     operationId: revokeCertV1
     description: |
       보안 사고, 키 탈취, 혹은 서비스 종료 등의 사유로 인해 기 발급된 인증서를 유효 기간 만료 전에 강제로 폐지합니다.
-      폐지 요청 시 대상 인증서 본문(Base64 DER)과 명확한 폐지 사유를 제공해야 합니다.
+      대상 인증서가 속한 PKI 도메인과 고유 시리얼 번호를 식별자로 사용합니다.
       요청이 수락되면 해당 인증서는 OCSP 응답 상태가 'Revoked'로 변경됩니다.
       한번 폐지된 인증서는 결코 다시 활성화될 수 없으며, 이후 모든 PnC 통신에서 거부됩니다.
       시스템 무결성 유지를 위해 해당 인증서의 소유 권한을 가진 주체(OEM, CPO, eMSP) 또는 최고 관리자(Trust Operator)만 호출 가능합니다.
@@ -139,28 +139,35 @@
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
       - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [certificate, revocationReason]
-            properties:
-              certificate: 
-                type: string
-                description: "폐지할 인증서의 Base64 DER 인코딩 본문입니다."
-              revocationReason:
-                type: string
-                description: "인증서 폐지 사유입니다."
-                enum: [privilegeWithdrawn, affiliationChanged, superseded, keyCompromise, cessationOfOperation, unspecified]
+      - name: caDomain
+        in: path
+        required: true
+        description: "인증서가 속한 PKI 도메인 식별자입니다."
+        schema:
+          type: string
+          enum: [v2g, oem, emsp, cpo, cps, veh]
+      - name: certificateSerialNumber
+        in: path
+        required: true
+        description: "폐지할 인증서의 고유 시리얼 번호(Hex)입니다."
+        schema:
+          type: string
+          pattern: '^[0-9a-fA-F]+$'
+      - name: revocationReason
+        in: query
+        required: false
+        description: "인증서 폐지 사유입니다."
+        schema:
+          type: string
+          enum: [privilegeWithdrawn, affiliationChanged, superseded, keyCompromise, cessationOfOperation, unspecified]
+          default: unspecified
     responses:
-      '200': 
+      '204': 
         description: "인증서 폐지 요청이 성공적으로 접수되어 OCSP에 반영되었습니다."
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400': 
-        description: "인증서 형식이 부적절하거나 폐지 사유가 명시되지 않았습니다."
+        description: "인증서 식별 정보가 부적절하거나 폐지 사유가 명시되지 않았습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
         description: "인증 실패입니다."
@@ -180,11 +187,6 @@
       - lang: 'cURL'
         label: 'Revoke Certificate'
         source: |
-          curl -X POST "https://api.kpnc-protocol.kr/v1/pki/revoke-certificate" \
+          curl -X DELETE "https://api.kpnc-protocol.kr/v1/pki/certificates/cpo/1234abcd?revocationReason=keyCompromise" \
             -H "KPNC-From-Party-Type: cpo" \
-            -H "KPNC-From-Party-Id: KR-CPO-01" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "certificate": "MIIC...[Base64 DER]...",
-              "revocationReason": "keyCompromise"
-            }'
+            -H "KPNC-From-Party-Id: KR-CPO-01"
