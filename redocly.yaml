@@ -1,5 +1,0 @@
-extends:
-  - recommended
-
-plugins:
-  - ./.spectral.mjs

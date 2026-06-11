@@ -1,9 +1,0 @@
-# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
-# See https://redocly.com/docs/cli/ for more information.
-components/securitySchemes/index.yaml:
-  no-unused-components:
-    - '#/OAuth2_Auth'
-components/schemas/index.yaml:
-  no-unused-components:
-    - '#/WebhookEventV1'
-    - '#/EvseIdV1'
