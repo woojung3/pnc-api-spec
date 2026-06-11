@@ -1,0 +1,240 @@
+/pcp/certificates/{pcid}:
+  put:
+    tags: ["PCP (Provisioning Certificate Pool)"]
+    summary: Provisioning 인증서 등록/갱신
+    operationId: addProvisioningCertificateV1
+    description: |
+      차량의 고유 식별자(PCID)를 경로 식별자로 사용하여 Provisioning 인증서 체인을 PCP에 등록하거나 갱신합니다 (Upsert).
+      
+      본 API는 주로 차량 제조사(OEM) 백엔드에서 호출하며, 차량이 공장에서 출고되기 전 혹은 현장에서 Provisioning 인증서가 갱신될 때 사용됩니다.
+      등록된 인증서는 PnC 충전 시 eMSP가 차량의 유효성을 검증하고 계약 인증서를 암호화하여 전달하기 위한 신뢰의 기초가 됩니다.
+      
+      **[WMI 기반 검증]**
+      시스템은 요청된 PCID의 첫 3자리인 WMI(World Manufacturer Identifier)를 추출하여 해당 요청자가 해당 제조사의 차량 데이터를 관리할 권한이 있는지 엄격히 검증합니다. 이는 시스템의 무결성을 유지하는 가장 기초적이고 중요한 보안 메커니즘입니다.
+
+      **[서버 검증 절차 예시]**
+      1. **WMI 권한 검증:** PCID의 WMI가 해당 OEM 계정에 할당된 권한과 일치하는지 확인합니다.
+      2. **유효 기간 검증:** 리프 인증서부터 Root까지 모든 체인의 유효 기간이 현재 시각 이후인지 확인합니다.
+      3. **상태 검증:** 각 인증서의 검증 서비스(OCSP)를 통해 폐지 여부를 실시간 확인합니다.
+      4. **신뢰 체인 검증:** 등록된 국내 PnC Root 인증서로부터 리프까지의 신뢰 체인(Trust Chain)을 엄격히 검증합니다.
+      
+      ISO 15118 규격에 따라 PCID와 인증서 체인 간의 무결성을 엄격히 검증하며, 동일한 PCID로 요청 시 최신 정보로 교체됩니다.
+
+      **[응답 처리 정책]**
+      본 API는 신규 등록(Create)과 기존 데이터 갱신(Update)을 구분하지 않는 Upsert 패턴을 따르며, 성공 시 비즈니스 로직의 단순화를 위해 동일하게 **200 OK**를 반환합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: pcid
+        in: path
+        required: true
+        description: "등록 또는 갱신할 차량의 고유 식별자(PCID)입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/index.yaml#/ProvisioningCertificateDataV1'
+    responses:
+      '200': 
+        description: "Provisioning 인증서 정보가 성공적으로 반영(등록 또는 갱신)되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+      '400': 
+        description: "잘못된 요청 데이터입니다. PCID 형식이 유효하지 않거나 인증서 체인이 손상된 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 정보가 유효하지 않거나 누락되었습니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "권한 부족입니다. 해당 WMI 범위를 관리할 권한이 없는 OEM의 요청인 경우 발생합니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "PCP 서버 내부 저장소 오류입니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Upsert Provisioning Cert'
+        source: |
+          curl -X PUT "https://api.kpnc-protocol.kr/v1/pcp/certificates/KRMOTORS1234567890" \
+            -H "KPNC-From-Party-Type: oem" \
+            -H "KPNC-From-Party-Id: KR-OEM-MOTORS" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "provisioningCertificateChain": {
+                "certificate": "MIIC...[Base64 DER]...",
+                "subCa1Certificate": "MIIC...[Base64 DER]..."
+              },
+              "xsdMsgDefNamespace": "urn:iso:15118:2:2013:MsgDef",
+              "v2gRootAuthorityKeyIdentifiers": ["74:61:..:..:.."]
+            }'
+
+  get:
+    tags: ["PCP (Provisioning Certificate Pool)"]
+    summary: Provisioning 인증서 조회
+    operationId: getProvisioningCertificateV1
+    description: |
+      특정 차량의 고유 식별자(PCID)를 기반으로 해당 차량의 Provisioning 인증서 체인을 조회합니다.
+      eMSP 백엔드가 사용자에게 새로운 충전 계약을 발급할 때, 차량의 Provisioning 인증서를 획득하여 계약 데이터를 암호화하기 위해 사용합니다.
+      조회 결과에는 리프 인증서뿐만 아니라 상위 Sub CA 체인이 포함되어 있어, ISO 15118-2/20 규격에 따른 인증서 설치 패키지 구성이 가능합니다.
+      
+      **[보안 및 정책 안내]**
+      본 조회 기능은 인증된 eMSP, CPS(서명 서비스) 또는 해당 차량의 제조사(OEM)에게만 허용됩니다. 무분별한 조회를 방지하기 위해 요청 파티의 권한을 엄격히 확인합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: pcid
+        in: path
+        required: true
+        description: "조회 대상 차량의 PCID(Provisioning Certificate Identifier)입니다. 예: 'KRMOTORS1234567890'"
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+      - name: xsdMsgDefNamespace
+        in: query
+        description: "ISO 15118 메시지 버전 네임스페이스입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1' }
+    responses:
+      '200':
+        description: "해당 차량의 Provisioning 인증서 정보를 성공적으로 찾았습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/index.yaml#/ProvisioningCertificateDataV1'
+      '400': 
+        description: "PCID 파라미터 형식이 규격에 맞지 않습니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "조회 권한이 없거나 차단된 파티의 요청입니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "요청한 PCID에 해당하는 인증서가 PCP 내에 등록되어 있지 않습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "데이터 조회 중 시스템 예외가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Fetch Cert by PCID'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/pcp/certificates/KRMOTORS1234567890" \
+            -H "KPNC-From-Party-Type: emsp" \
+            -H "KPNC-From-Party-Id: KR-EMSP-EMSP01"
+
+  delete:
+    tags: ["PCP (Provisioning Certificate Pool)"]
+    summary: Provisioning 인증서 삭제
+    operationId: deleteProvisioningCertificateV1
+    description: |
+      차량의 폐기, 번호판 변경(Re-provisioning), 혹은 보안 사고로 인한 인증서 무효화 시 PCP에서 해당 정보를 영구 삭제합니다.
+      주로 OEM이 차량의 생애 주기 종료를 시스템에 알릴 때 호출하며, 이후 해당 PCID로는 더 이상 PnC 서비스를 이용할 수 없습니다.
+
+      잘못된 삭제를 방지하기 위해 호출 전 반드시 내부 확인 절차를 거칠 것을 권고합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: pcid
+        in: path
+        required: true
+        description: "삭제할 차량의 PCID입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+    responses:
+      '204': 
+        description: "차량 인증서 정보가 성공적으로 삭제되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "삭제 권한이 없습니다. 관리자 또는 해당 차량을 등록한 OEM만 요청 가능합니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "삭제하려는 PCID 정보가 PCP에 존재하지 않습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "인증서 삭제 처리 중 서버 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Delete Vehicle Cert'
+        source: |
+          curl -X DELETE "https://api.kpnc-protocol.kr/v1/pcp/certificates/KRMOTORS1234567890" \
+            -H "KPNC-From-Party-Type: oem" \
+            -H "KPNC-From-Party-Id: KR-OEM-MOTORS"
+
+/pcp/lookup-vehicle/{pcid}:
+  get:
+    tags: ["PCP (Provisioning Certificate Pool)"]
+    summary: 차량 존재 여부 확인
+    operationId: lookupVehicleByPcidV1
+    description: |
+      특정 PCID를 가진 차량이 PCP에 등록되어 있고 현재 유효한 상태인지 빠르게 점검합니다.
+      전체 인증서 체인을 가져오는 무거운 작업 대신, 차량의 존재 여부만 True/False 형식으로 확인하고자 할 때 사용되는 경량 API입니다.
+
+      eMSP가 사용자로부터 충전 서비스 가입 요청을 받았을 때, 가입 가능한 차량인지 사전에 검증하는 용도로 최적화되어 있습니다.
+
+      응답 바디 없이 HTTP 상태 코드로 결과(200 OK 또는 404 Not Found)를 전달합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: pcid
+        in: path
+        required: true
+        description: "유효성을 점검할 차량의 PCID입니다."
+        schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
+    responses:
+      '200': 
+        description: "해당 차량이 유효하게 등록되어 있으며 PnC 서비스 이용이 가능합니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+      '400': 
+        description: "PCID 형식이 잘못되었습니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "조회 권한이 없습니다. CPO 등 허용되지 않은 파티의 요청입니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "지정한 PCID를 사용하는 차량이 존재하지 않습니다. eMSP는 사용자에게 차량 등록을 안내해야 합니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "조회 처리 중 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Quick Lookup'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/pcp/lookup-vehicle/KRMOTORS1234567890" \
+            -H "KPNC-From-Party-Type: emsp" \
+            -H "KPNC-From-Party-Id: KR-EMSP-EMSP01"

@@ -1,0 +1,190 @@
+/pki/ca-certificates:
+  get:
+    tags: ["PKI (Public Key Infrastructure)"]
+    summary: CA 인증서 체인 조회
+    operationId: getCaCertsV1
+    description: |
+      특정 도메인의 상위 CA 인증서 체인(Root 및 Sub CA)을 조회합니다.
+      클라이언트(eMSP, CPO, OEM 등)는 본 API를 통해 확보한 신뢰 체계를 바탕으로 시스템 간 신뢰 관계를 설정하고, 향후 발급받을 인증서의 경로 검증에 활용합니다.
+      응답은 구조화된 JSON 형식을 따르며, 인증서 데이터는 Base64 DER로 인코딩됩니다.
+
+      **[인증서 체인 정렬 정책]**
+      반환되는 `certificateChain` 배열은 반드시 **Bottom-to-Top** 순서를 따릅니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+      - name: caDomain
+        in: query
+        required: true
+        description: "인증서가 관리되는 PKI 도메인 식별자입니다."
+        schema:
+          type: string
+          enum: [v2g, oem, emsp, cpo, cps, veh]
+      - name: iso15118Version
+        in: query
+        required: true
+        description: "대상 ISO 15118 규격 버전 네임스페이스입니다."
+        schema:
+          $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1'
+    responses:
+      '200':
+        description: "CA 인증서 체인이 성공적으로 조회되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/index.yaml#/CaCertificateChainResponseV1'
+      '400': 
+        description: "잘못된 도메인 또는 버전 요청입니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "해당 PKI 도메인에 대한 접근 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "PKI 서비스 내부 장애입니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Fetch CA Chain'
+        source: |
+          curl -X GET "https://api.kpnc-protocol.kr/v1/pki/ca-certificates?caDomain=emsp&iso15118Version=urn:iso:15118:2:2013:MsgDef" \
+            -H "KPNC-From-Party-Type: emsp" \
+            -H "KPNC-From-Party-Id: KR-EMSP-EMSP01"
+
+/pki/enroll-certificate:
+  post:
+    tags: ["PKI (Public Key Infrastructure)"]
+    summary: 클라이언트 인증서 발급
+    operationId: enrollCertificateV1
+    description: |
+      사용자로부터 JSON 래핑된 CSR(PKCS#10)을 전달받아 새로운 클라이언트(Leaf) 인증서를 발급합니다. 
+      기존의 복잡한 바이너리 전송 방식 대신 표준 JSON을 채택하여 CPO 및 eMSP의 연동 편의성을 극대화하였습니다.
+      본 엔드포인트는 신규 발급뿐만 아니라 기존 인증서의 만료 전 갱신(Re-enrollment) 절차에도 공통으로 사용됩니다.
+
+      **[인증서 체인 구성 가이드]**
+      응답으로 반환되는 `certificateChain` 배열은 반드시 **Bottom-to-Top** 순서를 따릅니다. 클라이언트는 이 배열의 순서대로 ISO 15118 `CertificateChain` 요소를 구성하여 차량에 전달해야 합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/index.yaml#/EnrollmentRequestV1' }
+    responses:
+      '200':
+        description: "인증서 발급이 성공적으로 완료되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+        content:
+          application/json:
+            schema: { $ref: '../components/schemas/index.yaml#/EnrollmentResponseV1' }
+      '400': 
+        description: "제출된 CSR 형식이 잘못되었거나 도메인 정책에 위반되는 요청입니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "지정된 도메인에서 인증서를 발급받을 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "인증서 서명 처리 중 서버 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Enroll Certificate'
+        source: |
+          curl -X POST "https://api.kpnc-protocol.kr/v1/pki/enroll-certificate" \
+            -H "KPNC-From-Party-Type: cpo" \
+            -H "KPNC-From-Party-Id: KR-CPO-01" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "caDomain": "cpo",
+              "iso15118Version": "urn:iso:15118:2:2013:MsgDef",
+              "certificateSigningRequest": "MIIB...[Base64 CSR]..."
+            }'
+
+/pki/revoke-certificate:
+  post:
+    tags: ["PKI (Public Key Infrastructure)"]
+    summary: 인증서 폐지 요청
+    operationId: revokeCertV1
+    description: |
+      보안 사고, 키 탈취, 혹은 서비스 종료 등의 사유로 인해 기 발급된 인증서를 유효 기간 만료 전에 강제로 폐지합니다.
+      폐지 요청 시 대상 인증서 본문(Base64 DER)과 명확한 폐지 사유를 제공해야 합니다.
+      요청이 수락되면 해당 인증서는 OCSP 응답 상태가 'Revoked'로 변경됩니다.
+      한번 폐지된 인증서는 결코 다시 활성화될 수 없으며, 이후 모든 PnC 통신에서 거부됩니다.
+      시스템 무결성 유지를 위해 해당 인증서의 소유 권한을 가진 주체(OEM, CPO, eMSP) 또는 최고 관리자(Trust Operator)만 호출 가능합니다.
+    security:
+      - mTLS_Auth: []
+      - OAuth2_Auth: []
+    parameters:
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
+      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
+      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [certificate, revocationReason]
+            properties:
+              certificate: 
+                type: string
+                description: "폐지할 인증서의 Base64 DER 인코딩 본문입니다."
+              revocationReason:
+                type: string
+                description: "인증서 폐지 사유입니다."
+                enum: [privilegeWithdrawn, affiliationChanged, superseded, keyCompromise, cessationOfOperation, unspecified]
+    responses:
+      '200': 
+        description: "인증서 폐지 요청이 성공적으로 접수되어 OCSP에 반영되었습니다."
+        headers:
+          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
+      '400': 
+        description: "인증서 형식이 부적절하거나 폐지 사유가 명시되지 않았습니다."
+        $ref: '../components/responses/index.yaml#/BadRequest'
+      '401': 
+        description: "인증 실패입니다."
+        $ref: '../components/responses/index.yaml#/Unauthorized'
+      '403': 
+        description: "타인의 인증서를 폐지하려고 하거나 폐지 권한이 없습니다."
+        $ref: '../components/responses/index.yaml#/Forbidden'
+      '404': 
+        description: "폐지하려는 인증서를 PKI 데이터베이스에서 찾을 수 없습니다."
+        $ref: '../components/responses/index.yaml#/NotFound'
+      '429':
+        $ref: '../components/responses/index.yaml#/TooManyRequests'
+      '500': 
+        description: "CA 시스템의 업데이트 중 오류가 발생했습니다."
+        $ref: '../components/responses/index.yaml#/InternalServerError'
+    x-codeSamples:
+      - lang: 'cURL'
+        label: 'Revoke Certificate'
+        source: |
+          curl -X POST "https://api.kpnc-protocol.kr/v1/pki/revoke-certificate" \
+            -H "KPNC-From-Party-Type: cpo" \
+            -H "KPNC-From-Party-Id: KR-CPO-01" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "certificate": "MIIC...[Base64 DER]...",
+              "revocationReason": "keyCompromise"
+            }'
