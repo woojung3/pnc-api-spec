@@ -21,6 +21,7 @@ KPNC-Always-Return-Exi:
   name: KPNC-Always-Return-Exi
   in: header
   schema: { type: boolean, default: true }
+  description: "에러 발생 시에도 ISO 15118 응답(EXI)을 수신하려면 이 파라미터를 true로 설정하십시오."
 KPNC-Trace-Id:
   name: KPNC-Trace-Id
   in: header
