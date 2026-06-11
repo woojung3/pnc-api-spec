@@ -1,7 +1,7 @@
 import os
 import sys
 
-target = "api/index.html"
+target = "dist/index.html"
 if not os.path.exists(target):
     print(f"Error: {target} not found")
     sys.exit(1)
