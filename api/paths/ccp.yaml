@@ -60,7 +60,7 @@
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "서버 내부 오류입니다. KPNC 시스템 연동 중 일시적인 장애가 발생한 경우입니다."
+        description: "서버 내부 오류입니다. 시스템 연동 중 일시적인 장애가 발생한 경우입니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -127,7 +127,7 @@
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "KPNC 백엔드 서비스 오류입니다."
+        description: "백엔드 서비스 오류입니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

@@ -15,8 +15,8 @@ KPNC-From-Party-Id:
     요청을 보내는 기관의 고유 식별자(사업자 ID 등)입니다.
 
     **[보안 검증 정책]**
-    - **Identity Linkage:** 본 헤더의 값은 인증 계층(mTLS 인증서의 CN 또는 OAuth2 JWT의 Sub)에서 추출된 식별 정보와 반드시 일치해야 합니다.
-    - **권한 검증:** 시스템은 인증된 주체가 본 ID를 사칭하는지 검증하며, 불일치 시 요청을 차단합니다.
+    - 본 헤더의 값은 인증 계층에서 추출된 식별 정보와 반드시 일치해야 합니다.
+    - 시스템은 인증된 주체가 본 ID를 사칭하는지 검증하며, 불일치 시 요청을 차단합니다.
 KPNC-Always-Return-Exi:
   name: KPNC-Always-Return-Exi
   in: header

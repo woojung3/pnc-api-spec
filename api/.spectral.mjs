@@ -1,14 +1,13 @@
 /**
- * KPNC (Korea PnC) PKI API Spectral Ruleset
+ * PnC PKI API Spectral Ruleset
  * Adds National Infrastructure Overrides
  */
 export default {
   rules: {
-    /* 1. KPNC Header Convention: Prefix 'KPNC-' + Pascal-Kebab-Case */
-    // KPNC 헤더 규칙을 정의합니다.
+    /* 1. Header Convention: Prefix 'KPNC-' + Pascal-Kebab-Case */
     "kpnc-header-convention": {
       description: "Custom headers must start with 'KPNC-' and follow Pascal-Kebab-Case (e.g., KPNC-From-Party-Id).",
-      message: "Header '{{property}}' does not follow KPNC convention (KPNC-Pascal-Kebab-Case).",
+      message: "Header '{{property}}' does not follow convention (KPNC-Pascal-Kebab-Case).",
       severity: "error",
       given: "$.components.parameters[?(@.in === 'header')].name",
       then: {

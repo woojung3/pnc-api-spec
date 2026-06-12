@@ -9,7 +9,7 @@ info:
 
     # 1. 기술 표준 및 운영 개요
 
-    본 가이드라인은 전기차 Plug & Charge (PnC) 서비스 구현을 위해 차량 제조사 (OEM), 모빌리티 운영사업자 (eMSP), 충전사업자 (CPO) 및 V2G PKI Backend 간의 시스템 간 연계 방식과 데이터 흐름을 정의합니다. 또한, PnC운영 환경에서의 주요 시나리오를 기반으로 전기차, 충전기, CSMS (CPO) 및 PKI Backend 간 통신 인터페이스 및 메시지 규격을 명세하며, PnC구조에 적용되는 보안 체계 요구사항에 대해 기술합니다.
+    본 가이드라인은 전기차 Plug & Charge (PnC) 서비스 구현을 위해 차량 제조사 (OEM), 모빌리티 운영사업자 (eMSP), 충전사업자 (CPO) 및 V2G PKI 백엔드 간의 시스템 간 연계 방식과 데이터 흐름을 정의합니다. 또한, PnC운영 환경에서의 주요 시나리오를 기반으로 전기차, 충전기, CSMS (CPO) 및 PKI 백엔드 간 통신 인터페이스 및 메시지 규격을 명세하며, PnC구조에 적용되는 보안 체계 요구사항에 대해 기술합니다.
 
     ### 1.1 버전 관리 정책
 
@@ -44,10 +44,10 @@ info:
         2. **신뢰 매핑:** 특정 계약 데이터가 어떤 Root CA를 최상위 앵커로 하는 CPS에 의해 서명되었는지 식별 (예: `cpsV2GRootCertificateFingerprint`).
         3. **고유 식별:** UUID와 별개로 인증서 자체의 물리적 특성에 기반한 전역 고유 식별자로 활용.
 
-    ### 1.5 용어 정의 및 약어 (Abbreviations)
+    ### 1.5 용어 정의 및 약어
     본 명세서에서 사용하는 주요 용어 및 약어에 대한 정의입니다. ISO 15118 및 VDE-AR-E 2802-100-1 표준의 정의를 따릅니다.
 
-    | 약어 | 원어 (Full Name) | 비즈니스 의미 |
+    | 약어 | 전체 명칭 | 상세 |
     | :--- | :--- | :--- |
     | **CCP** | Contract Certificate Pool | CPS에 의해 서명된 계약 데이터(Contract Bundle)가 저장되는 중앙 저장소 |
     | **CPO** | Charge Point Operator | 충전 인프라를 운영하고 관리하는 사업자 (충전사업자) |
@@ -57,12 +57,12 @@ info:
     | **eMSP** | e-Mobility Service Provider | 가입자에게 충전 계약 및 서비스를 제공하는 사업자 (서비스사업자) |
     | **EV** | Electric Vehicle | 전기자동차 |
     | **EVSE** | Electric Vehicle Supply Equipment | 전기차 충전기 (충전 지점) |
-    | **EXI** | Efficient XML Interchange | XML 데이터를 이진화하여 압축한 데이터 형식 (ISO 15118 메시지 형식) |
+    | **EXI** | Efficient XML Interchange | XML 데이터를 이진화하여 압축한 데이터 형식 |
     | **OCSP** | Online Certificate Status Protocol | 인증서 유효 상태를 실시간으로 확인하는 프로토콜 |
     | **OEM** | Original Equipment Manufacturer | 차량 제조사 |
-    | **PCP** | Provisioning Certificate Pool | 차량의 Provisioning 인증서(출고 인증서)를 저장하고 관리하는 저장소 |
-    | **PCID** | Provisioning Certificate Identifier | 차량의 고유 식별자 (ISO 15118 기준) |
-    | **PKI** | Public Key Infrastructure | 공개키 기반 구조 (인증서 발급/관리 체계) |
+    | **PCP** | Provisioning Certificate Pool | 차량의 Provisioning 인증서를 저장하고 관리하는 저장소 |
+    | **PCID** | Provisioning Certificate Identifier | 차량의 고유 식별자 |
+    | **PKI** | Public Key Infrastructure | 인증서 발급/관리 체계 |
     | **PnC** | Plug & Charge | 케이블 연결만으로 인증, 결제, 충전이 자동으로 이루어지는 서비스 |
     | **RCP** | Root Certificate Pool | 최상위 Root 인증서(V2G, OEM, eMSP 등)들을 관리하는 저장소 |
     | **V2G** | Vehicle to Grid | 전기차와 전력망 간의 상호 작용 및 통신 기술 |
@@ -70,21 +70,20 @@ info:
     | **AKID** | Authority Key Identifier | 인증서 발급 기관의 공개키 식별자 |
     | **HSM** | Hardware Security Module | 암호화 키를 안전하게 생성, 저장 및 관리하는 하드웨어 장치 |
     | **mTLS** | Mutual Transport Layer Security | 클라이언트와 서버가 서로의 인증서를 검증하는 상호 TLS 인증 |
-    | **JWT** | JSON Web Token | 당사자 간에 정보를 JSON 개체로 안전하게 전송하기 위한 개방형 표준 (RFC 7519) |
-    | **RBAC** | Role-Based Access Control | 사용자의 역할에 따라 시스템 리소스에 대한 접근 권한을 제어하는 방식 |
+    | **JWT** | JSON Web Token | 당사자 간에 정보를 JSON 개체로 안전하게 전송하기 위한 개방형 표준 |
 
     ### 1.6 연동 개발 및 테스트 도구 활용 안내
-    본 명세서는 표준 OpenAPI Specification (OAS) 3.0.3을 준수하여 작성되었습니다. 문서 상단의 **[Download]** 버튼을 통해 내려받은 명세 파일(`openapi.json` 또는 `openapi.yaml`)을 활용하여 다음과 같이 개발 생산성을 높일 수 있습니다.
+    본 명세서는 표준 OpenAPI Specification (OAS)을 준수하여 작성되었습니다. 문서 상단의 **[Download]** 버튼을 통해 내려받은 명세 파일을 활용하여 다음과 같이 활용할 수 있습니다.
 
     - **Swagger UI 활용:** 로컬 또는 사내 환경에 Swagger UI를 배포하고 명세 파일을 로드하여 직접적인 API 호출 테스트를 수행할 수 있습니다.
-    - **Mock 서버 생성:** `Prism`, `Stoplight` 또는 `Postman`과 같은 도구를 사용하여 명세 기반의 Mock 서버를 즉시 구축하고, 실제 백엔드 구현 전에도 인터페이스 연동 로직을 병행 개발할 수 있습니다.
-    - **클라이언트 코드 생성:** `OpenAPI Generator`를 통해 Java, Python, TypeScript 등 다양한 언어의 클라이언트 SDK 및 데이터 모델(DTO)을 자동으로 생성하여 오타 방지 및 개발 시간을 단축할 수 있습니다.
+    - **Mock 서버 생성:** `Prism`, `Stoplight` 또는 `Postman`과 같은 도구를 사용하여 명세 기반의 Mock 서버를 구축하고, 실제 백엔드 구현 전에도 인터페이스 연동 로직을 병행 개발할 수 있습니다.
+    - **클라이언트 코드 생성:** `OpenAPI Generator`를 통해 Java, Python, TypeScript 등 다양한 언어의 클라이언트 SDK 및 데이터 모델(DTO)을 자동으로 생성할 수 있습니다.
 
     ---
 
     # 2. 비즈니스 프로세스 흐름
 
-    대한민국 PnC 생태계의 주요 시나리오별 상세 시퀀스입니다.
+    주요 시나리오별 상세 시퀀스입니다.
 
     ### 2.1 PnC 전체 라이프사이클
     차량 생산부터 최종 충전 계약 설치까지의 통합 흐름입니다.
@@ -171,7 +170,7 @@ info:
         Note left of eMSP: 획득한 인증서로 계약 데이터 암호화 준비
     ```
 
-    ### 2.5 Managed 계약 생성 프로세스 (eMSP (Managed) 중심)
+    ### 2.5 시스템 위임형 (Managed) 계약 생성 프로세스 (eMSP (Managed) 중심)
     자체 연산 능력이 없는 eMSP를 위해 시스템이 발급부터 저장까지 대행하는 흐름입니다.
 
     ```mermaid
@@ -220,7 +219,7 @@ info:
     | CSR | `application/pkcs10` | PKCS 10, RFC 7030 참고 |
     | ISO 15118 메시지 | Base64(EXI) | `certificateInstallationReq/Res` 등 |
 
-    ### 3.3 에러 규약 (RFC 7807 Problem Details)
+    ### 3.3 에러 규약
     모든 실패 응답(4xx, 5xx)은 [RFC 7807](https://tools.ietf.org/html/rfc7807) 표준 본문을 반환하며, `type` 필드를 통해 기계 판독 가능한 고유 식별자를 제공합니다.
 
     - **식별자 형식:** `urn:pnc:error:{domain}:{reason}` (예: `urn:pnc:error:ccp:contract-already-exists`)
@@ -244,19 +243,19 @@ info:
     ### 4.2 인증 식별자와 헤더의 연계 검증 (Identity Linkage)
     인증 방식과 관계없이, 호출자의 사칭(Impersonation)을 방지하기 위해 **인증 계층의 주체 정보**와 **애플리케이션 헤더(`KPNC-From-Party-Id`)** 간의 연계 검증이 수행되어야 합니다.
 
-    - **검증 메커니즘 (안):**
-        1. **Identity Extraction:** 인증 과정에서 클라이언트의 고유 식별자(인증서 CN 또는 JWT Sub)를 추출합니다.
-        2. **Header Comparison:** 추출된 식별자가 API 요청 헤더인 `KPNC-From-Party-Id`와 논리적으로 일치하는지 대조합니다.
-        3. **Policy Enforcement:** 두 식별 정보가 불일치할 경우, 인증되지 않은 사용자의 사칭 시도로 간주하여 `401 Unauthorized`를 반환합니다.
+    - **검증 메커니즘:**
+        1. 인증 과정에서 클라이언트의 고유 식별자(인증서 CN 또는 JWT Sub)를 추출합니다.
+        2. 추출된 식별자가 API 요청 헤더인 `KPNC-From-Party-Id`와 논리적으로 일치하는지 대조합니다.
+        3. 두 식별 정보가 불일치할 경우, 인증되지 않은 사용자의 사칭 시도로 간주하여 `401 Unauthorized`를 반환합니다.
 
-    ### 4.3 역할 및 권한 (RBAC)
+    ### 4.3 역할 및 권한
     인증된 주체의 역할(Party Type)에 따라 리소스별 접근 권한이 차등 부여됩니다.
     - **OEM:** PCID의 WMI(첫 3자리) 기반 소유권 검증 및 자사 차량 데이터 관리 권한.
     - **eMSP:** eMAID 접두사 기반의 가입자 계약 생애주기 관리 및 CPS 서명 요청 권한.
     - **CPO:** 실시간 충전 프로토콜 수행을 위한 CCP 계약 데이터 조회 권한.
     - **Trust Operator:** 본 시스템의 운영 주체로, Root 인증서 등록/삭제 및 시스템 전반의 관리 권한 보유.
 
-    ### 4.4 서비스별 접근 권한 매핑 표 (Draft)
+    ### 4.4 서비스별 접근 권한 매핑 표
     | 서비스 | 기능 | 권한 유형 | OEM | CPO | eMSP | CPS | Operator |
     | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
     | **RCP** | [Root 단건 조회](#operation/getRootCertificateV1) | 읽기 | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -295,7 +294,7 @@ info:
     | :--- | :--- | :--- | :--- |
     | 전체 API 공통 | 30회 / min | 클라이언트별 | 소스 IP 또는 식별 주체 기준 |
 
-    - **제한 방식:** 클라이언트별 단위 시간당 요청 횟수를 제한합니다. 클라이언트 식별은 원활한 연동과 인프라 효율성을 위해 기본적으로 **소스 IP(Source IP)**를 기준으로 수행함을 원칙으로 합니다.
+    - **제한 방식:** 클라이언트별 단위 시간당 요청 횟수를 제한합니다. 클라이언트 식별은 원활한 연동과 인프라 효율성을 위해 기본적으로 소스 IP(Source IP)를 기준으로 수행합니다.
     - **응답 헤더:** 모든 API 응답(성공/실패 포함)에는 다음 헤더가 포함될 수 있습니다.
       - `KPNC-Rate-Limit-Limit`: 허용된 최대 요청 수
       - `KPNC-Rate-Limit-Remaining`: 현재 남은 요청 가능 수
@@ -304,7 +303,7 @@ info:
 
     > **[Note]** 
     >
-    > 본 명세서의 가독성을 위해 성공 응답(2xx)에는 위 헤더들을 명시적으로 정의하지 않았으나, 실제 런타임에서는 모든 응답에 포함되어 전달됩니다. `429 Too Many Requests` 응답 시에는 클라이언트의 즉각적인 대응(Retry-After 확인 등)을 돕기 위해 헤더 정보가 명세에 상세히 기술되어 있습니다.
+    > `429 Too Many Requests` 응답 시에는 클라이언트의 즉각적인 대응(Retry-After 확인 등)을 돕기 위해 헤더 정보가 명세에 상세히 기술되어 있습니다.
 
   contact:
     name: "TBD"
@@ -318,7 +317,7 @@ x-redocly-config: ./api/.spectral.mjs
 
 servers:
   - url: https://api.kpnc-protocol.kr/v1
-    description: KPNC Production Environment
+    description: Korean PnC PKI Production Environment
 
 security:
   - mTLS_Auth: []
@@ -326,9 +325,9 @@ security:
 
 tags:
   - name: "RCP (Root Certificate Pool)"
-    description: "신뢰의 기반. OEM/eMSP/V2G Root 인증서 저장 및 배포를 담당합니다."
+    description: "OEM/eMSP/V2G Root 인증서 저장 및 배포를 담당합니다."
   - name: "eMSP Service"
-    description: "연산 능력이 없는 eMSP를 위한 비즈니스 오케스트레이션. 인증서 발급부터 CCP 등록까지의 전 과정을 대행합니다."
+    description: "연산 능력이 없는 eMSP를 위한 위임형 서비스입니다. 인증서 발급부터 CCP 등록까지의 전 과정을 대행합니다."
   - name: "PCP (Provisioning Certificate Pool)"
     description: "OEM 차량 Provisioning 인증서 저장 및 PCID 조회를 담당합니다."
   - name: "CPS (Contract Provisioning Service)"
@@ -344,7 +343,7 @@ tags:
       ### 1. Webhook 이벤트 정의
       본 시스템에서 사용하는 Webhook 이벤트 목록입니다. 상세 데이터 구조는 OpenAPI 스펙의 `WebhookEventV1` 스키마를 참조하십시오.
 
-      > **⚠️ 주의: 본 이벤트 분류 및 명칭은 현재 초안 상태이며, 실제 운영 환경 및 연동 요구사항에 따라 변경될 수 있습니다.**
+      > **주의: 본 이벤트 분류 및 명칭은 현재 초안 상태이며, 실제 운영 환경 및 연동 요구사항에 따라 변경될 수 있습니다.**
 
       | 이벤트 코드 | 비즈니스 의미 |
       | :--- | :--- |
@@ -364,21 +363,20 @@ tags:
       | `contract.updated.on.oem` | OEM 환경 내 계약 업데이트 적용 |
       | `contract.deleted.on.oem` | OEM 환경 내 계약 삭제 완료 |
 
-      ### 2. 전달 보장 정책 (Delivery Policy)
-      시스템은 일시적인 네트워크 장애나 수신 측 서버의 단기 순단에 대응하기 위해 다음과 같은 공격적인 재시도 정책을 시행합니다.
+      ### 2. 전달 보장 정책
+      시스템은 일시적인 네트워크 장애나 수신 측 서버의 단기 순단에 대응하기 위해 다음과 같은 재시도 정책을 시행합니다.
 
       - **재시도 전략:** 지수 백오프(Exponential Backoff) 기반 자동 재시도.
-      - **재시도 간격 및 횟수:** 총 **5회** 시도 (간격: 1초, 4초, 16초, 64초, 256초).
-      - **최대 가용 시간:** 최초 발생 시점으로부터 약 **6분(341초)** 동안 재시도를 수행합니다.
+      - **재시도 간격 및 횟수:** 총 5회 시도 (간격: 1초, 4초, 16초, 64초, 256초).
       - **실패 처리:** 5회 재시도 후에도 성공(`2xx`) 응답을 받지 못할 경우, 해당 이벤트 전달은 최종 실패 처리되며 시스템 대기열에서 제거됩니다.
       - **상태 코드 대응:** 타임아웃(10초 이내 무응답) 또는 `2xx` 이외의 모든 응답(4xx, 5xx) 발생 시 재시도를 트리거합니다.
 
       ### 3. 데이터 정합성 보장을 위한 연동사 준수 사항
-      Webhook은 비동기 알림 수단이며, 국가 시스템의 재시도 정책은 '단기 장애 대응'에 초점이 맞춰져 있습니다. 연동 업체는 시스템 간 데이터 무결성을 보장하기 위해 다음 사항을 반드시 구현해야 합니다.
+      Webhook은 비동기 알림 수단이며, 시스템의 재시도 정책은 '단기 장애 대응'에 초점이 맞춰져 있습니다. 연동 업체는 시스템 간 데이터 무결성을 보장하기 위해 다음 사항을 반드시 구현해야 합니다.
 
-      - **주기적 정합성 대조 (Polling):** 연동사의 시스템 장애가 재시도 정책 시간(6분)보다 길어질 경우를 대비하여, 각 서비스 도메인(CCP, PCP 등)의 조회 API를 활용한 주기적 데이터 동기화 로직을 반드시 갖추어야 합니다.
-      - **멱등성(Idempotency) 확보:** 재시도 간격이 짧으므로 동일한 이벤트가 중복 전달될 가능성이 높습니다. 수신 측에서는 `eventId`를 식별자로 사용하여 중복 처리 방지 로직을 반드시 구현해야 합니다.
-      - **실시간 공정(EOL) 대응:** 차량 제조 라인(EOL) 등 즉각적인 피드백과 차단형(Blocking) 처리가 필요한 중요한 로직에는 웹훅에만 의존하지 말고, API 응답값 또는 즉시 조회 API를 병행 사용하십시오.
+      - **주기적 정합성 대조:** 연동사의 시스템 장애가 재시도 정책 시간보다 길어질 경우를 대비하여, 각 서비스 도메인(CCP, PCP 등)의 조회 API를 활용한 주기적 데이터 동기화 로직을 갖추어야 합니다.
+      - **멱등성 확보:** 동일한 이벤트가 중복 전달될 가능성에 대비해야 합니다. 수신 측에서는 `eventId`를 식별자로 사용하여 중복 처리 방지 로직을 구현해야 합니다.
+      - **실시간 공정 대응:** 즉각적인 피드백과 차단형 처리가 필요한 중요한 로직에는 API 응답값 또는 즉시 조회 API를 병행 사용하십시오.
 
 paths:
   $ref: './paths/index.yaml'

@@ -54,17 +54,17 @@ CertificateChainV1:
       type: string
       maxLength: 16384
       pattern: '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
-      description: "Base64 DER encoded leaf certificate"
+      description: "Base64 DER로 인코딩된 리프(Leaf) 인증서입니다."
     subCa1Certificate: 
       type: string
       maxLength: 16384
       pattern: '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
-      description: "Base64 DER encoded sub CA certificate"
+      description: "Base64 DER로 인코딩된 sub CA 인증서입니다."
     subCa2Certificate: 
       type: string
       maxLength: 16384
       pattern: '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
-      description: "Base64 DER encoded sub CA certificate (optional)"
+      description: "Base64 DER로 인코딩된 sub CA 인증서입니다. (optional)"
 
 RootCertificateV1:
   type: object
@@ -95,7 +95,7 @@ RootCertificateV1:
       type: string
       maxLength: 16384
       pattern: '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
-      description: "Base64 DER encoded root certificate"
+      description: "Base64 DER로 인코딩된 root 인증서입니다."
     fingerprint: 
       type: string
       pattern: '^[0-9a-fA-F]{64}$'
@@ -119,9 +119,9 @@ RootCertificateV1:
       description: |
         Root CA의 Authority Key Identifier (또는 SKI)입니다. 본 필드는 데이터 무결성 보장을 위해 모든 등록 요청 시 필수(Required)로 포함되어야 합니다.
         
-        **[데이터 정합성 및 검증 정책]**
-        1. **강력한 상호 검증:** 서버는 인증서(`caCertificate`) 내부에서 추출한 AKID 값과 본 인자로 전달된 값을 엄격히 대조합니다. 두 값이 모두 존재할 경우 반드시 일치해야 하며, **불일치 시 `400 Bad Request`를 반환하여 등록을 차단합니다.**
-        2. **식별자 강제 할당 (Fallback):** 일부 표준 미준수 인증서와 같이 내부에 AKID 확장 필드가 누락된 경우, 본 인자로 전달된 값을 해당 Root의 공식 식별자로 확정하여 시스템에 등록합니다.
+        **[검증 정책]**
+        1. **상호 검증:** 서버는 인증서(`caCertificate`) 내부에서 추출한 AKID 값과 본 인자로 전달된 값을 엄격히 대조합니다. 두 값이 모두 존재할 경우 반드시 일치해야 하며, 불일치 시 `400 Bad Request`가 반환됩니다.
+        2. **식별자 할당:** 일부 표준 미준수 인증서와 같이 내부에 AKID 확장 필드가 누락된 경우, 본 인자로 전달된 값을 해당 Root의 공식 식별자로 확정하여 시스템에 등록합니다.
         3. **용도:** ISO 15118 프로토콜 수행 시 차량 및 eMSP가 해당 Root를 식별하기 위한 핵심 키로 사용됩니다.
     certificateValidFrom: 
       type: string
@@ -319,7 +319,7 @@ PostEndpointReqV1:
 EventEnumV1:
   type: string
   description: |
-    KPNC 시스템에서 발생하는 이벤트 코드 목록입니다.
+    시스템에서 발생하는 이벤트 코드 목록입니다.
     
     | 이벤트 코드 | 비즈니스 의미 | 사용자 로그 예시 |
     | :--- | :--- | :--- |
@@ -383,7 +383,7 @@ WebhookRootPayloadV1:
     distinguishedName: { type: string }
     commonName: { type: string }
     rootType: { $ref: '#/PkiTypeV1' }
-    caCertificate: { type: string, description: "Base64 DER encoded root certificate (Optional)" }
+    caCertificate: { type: string, description: "Base64 DER로 인코딩된 root 인증서입니다. (Optional)" }
 
 WebhookProvisioningPayloadV1:
   type: object

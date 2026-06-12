@@ -121,7 +121,7 @@
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
-        label: 'Webhook 등록 예시'
+        label: 'Register Webhook'
         source: |
           curl -X POST "https://api.kpnc-protocol.kr/v1/event/endpoints" \
             -H "KPNC-From-Party-Type: oem" \
