@@ -5,14 +5,12 @@
     operationId: signContractDataV1
     description: |
       eMSP가 자체 PKI를 통해 발급한 계약 인증서 번들을 V2G 신뢰 체계(V2G PKI)로 서명하여 완성된 계약 데이터를 생성합니다.
-      이 과정은 ISO 15118 PnC 표준에서 요구하는 이중 서명 구조(eMSP 서명 + V2G 서명)를 완성하는 핵심 단계입니다.
 
       **[역할 및 책임 분담]**
       - **eMSP:** 계약 인증서 체인 발급, 암호화된 프라이빗 키 생성, DH 공개키 추출 등을 포함한 전체 계약 번들 구성을 완료하여 제출해야 합니다. (eMSP의 자체 PKI 보유 필수)
       - **CPS:** 제출된 번들을 검증한 후, V2G Root 계층의 서명을 추가하여 최종 계약 데이터(EXI 기반)를 완성하고 이를 CCP(Contract Certificate Pool)에 원자적으로 저장하는 역할을 수행합니다.
 
       본 API의 성공 응답(`201 Created`)은 V2G 서명 완료와 CCP 내 물리적 저장 및 배포 준비가 하나의 트랜잭션으로 완료됨을 보장합니다. 따라서 호출자는 별도의 정합성 검증이나 추가 저장 요청 없이 즉시 CCP를 통해 계약 조회가 가능합니다.
-      국가 PnC 보안 가이드라인에 따라 모든 데이터는 보안이 유지되는 채널을 통해 전송되어야 합니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []
@@ -53,7 +51,7 @@
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "CPS 내부 서명 모듈(HSM 등) 오류가 발생했습니다."
+        description: "CPS 내부 서명 모듈 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -83,7 +81,7 @@
       현재 활성화된 모든 CPS(서명 서비스)의 인증서 체인 목록을 조회합니다.
       eMSP 또는 OEM 백엔드는 이 API를 호출하여 CPS가 서명 시 사용하는 하위 CA(Sub CA) 인증서 체인을 확보해야 합니다.
       확보된 체인 정보는 ISO 15118 CertificateInstallationRes 메시지 구성 시 'CPS Certificate Chain' 필드에 포함되어 차량에 전달됩니다.
-      국가 PnC 인프라의 보안 정책에 따라 CPS 인증서는 정기적으로 갱신될 수 있으므로, 주기적인 동기화가 권고됩니다.
+      보안 정책에 따라 CPS 인증서는 정기적으로 갱신될 수 있으므로, 주기적인 동기화가 권고됩니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []

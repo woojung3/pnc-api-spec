@@ -5,13 +5,13 @@
     operationId: getContractDataByEmaidV1
     description: |
       특정 eMAID에 매핑된 모든 계약 정보의 상태와 메타데이터를 조회합니다. 
-      CCP는 CPS(Contract Provisioning Service)에 의해 관리되는 수동적 저장소(Passive Pool)로서, 서명된 계약 데이터의 생애주기는 CPS의 비즈니스 로직에 종속됩니다.
+      CCP는 CPS(Contract Provisioning Service)에 의해 관리되는 수동적 저장소로서, 서명된 계약 데이터의 생애주기는 CPS의 비즈니스 로직에 종속됩니다.
 
-      **[역할 및 용도 분리: Management API]**
+      **[역할 및 용도 분리: 관리용 API]**
       본 API는 ISO 15118 실시간 메시지 처리 흐름(In-band process) 외부에서 사용자의 계약 보유 현황을 조회하거나 사후 정산/관리 모니터링 목적으로 활용되는 **관리용 인터페이스**입니다. 
       반환되는 데이터는 JSON 형식의 메타데이터이며, 실시간 계약 설치(CertificateInstallation) 과정에서 필요한 EXI 바이너리 덩어리가 아닙니다.
 
-      실시간 계약 설치 과정이나 차량 Push용 데이터가 필요한 경우 본 API 대신 반드시 **Protocol API**(`POST /ccp/signed-contract-data` 또는 `GET /ccp/signed-contract-data/{emaid}/{pcid}`)를 사용해야 합니다.
+      실시간 계약 설치 과정이나 차량 Push용 데이터가 필요한 경우 본 API 대신 **Protocol API**(`POST /ccp/signed-contract-data` 또는 `GET /ccp/signed-contract-data/{emaid}/{pcid}`)를 사용해야 합니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []
@@ -79,10 +79,11 @@
     description: |
       특정 차량의 식별값(PCID)에 매핑된 모든 계약 정보를 조회합니다.
       차량 제조사(OEM)가 자사 차량에 할당된 계약 목록을 관리하고 최신 상태를 유지하기 위해 이 엔드포인트를 사용합니다.
-      특히 OEM은 차량이 충전기에 연결되었을 때 해당 차량에 유효한 계약이 CCP에 존재하는지 확인하거나, 주기적인 동기화를 통해 계약 수명 주기(Lifecycle)를 관리하는 용도로 활용할 수 있습니다.
-      **[Management API]** 본 API는 관리용 메타데이터 조회를 위한 인터페이스입니다.
-      ISO 15118-2/20의 계약 발급 및 설치 과정에서 차량-계약 매핑 상태를 확인하는 데 필수적인 API입니다.
-      모든 통신은 국가 표준에 따라 보안이 유지되어야 합니다.
+      특히 OEM은 차량이 충전기에 연결되었을 때 해당 차량에 유효한 계약이 CCP에 존재하는지 확인하거나, 주기적인 동기화를 통해 계약 수명 주기를 관리하는 용도로 활용할 수 있습니다.
+
+      **[역할 및 용도 분리: 관리용 API]**
+      본 API는 관리용 메타데이터 조회를 위한 인터페이스입니다.
+      ISO 15118의 계약 발급 및 설치 과정에서 차량-계약 매핑 상태를 확인하는 API입니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []
@@ -93,7 +94,7 @@
       - name: pcid
         in: path
         required: true
-        description: "차량의 고유 식별자인 PCID입니다. PnC협의체 합의에 따라 17~255자의 문자열을 허용합니다."
+        description: "차량의 고유 식별자인 PCID입니다. 17~255자의 문자열을 허용합니다."
         schema: { $ref: '../components/schemas/index.yaml#/PcidV1' }
       - name: xsdMsgDefNamespace
         in: query
@@ -145,11 +146,11 @@
     description: |
       ISO 15118의 CertificateInstallationRequest 메시지를 기반으로 즉시 설치 가능한 서명된 계약 데이터를 조회합니다.
       충전기(EVSE)로부터 받은 EXI 스트림(Base64 인코딩)을 전달하면, CCP는 내부의 계약들과 대조하여 해당 차량에 적합한 CertificateInstallationRes를 생성하여 반환합니다.
-      이 과정은 CPO 백엔드가 ISO 15118-2/20 프로토콜의 중계자 역할을 수행할 때 핵심적인 단계입니다.
+      이 과정은 CPO 백엔드가 ISO 15118 프로토콜의 중계자 역할을 수행할 때 핵심적인 단계입니다.
       반환되는 데이터에는 V2G 신뢰 체계(CPS)로부터 서명된 계약 인증서 체인과 암호화된 프라이빗 키 정보가 포함되어 있어, 차량이 즉시 계약을 설치할 수 있게 합니다.
 
       **[속도 제한 정책]**
-      본 API는 시스템 안정성 확보를 위해 속도 제한이 적용됩니다. 상세 수치는 서문의 '5. 속도 제한 정책' 공통 기준에 따릅니다.
+      주요 API는 시스템 안정성 확보를 위해 속도 제한이 적용됩니다. 상세 수치는 속도 제한 정책에 따릅니다.
       - **임계값 초과:** HTTP 429 오류가 반환되며, 응답 헤더의 `KPNC-Rate-Limit-*` 필드를 통해 상세 제한 상태를 확인할 수 있습니다.
     security:
       - mTLS_Auth: []
@@ -245,10 +246,10 @@
 
       본 API는 "게시 철회"의 역할을 수행하며, 인증서 자체의 효력을 정지시키는 "폐지"는 수행하지 않습니다.
       사용자가 서비스를 일시 중단하거나, 단순 데이터 정합성 오류로 인해 저장소에서 데이터를 치워야 할 때 사용합니다.
-      인증서 폐지를 포함한 완전한 서비스 종료는 eMSP 서비스의 `Managed Revocation` API를 사용해야 합니다.
+      인증서 폐지를 포함한 과정은 eMSP가 자체적으로 수행하거나, (위임형 eMSP일 경우) eMSP 서비스의 `Managed Revocation` API를 사용해야 합니다.
 
       **[데이터 생애주기 참고]**
-      - PCP에서 특정 차량의 Provisioning 인증서가 삭제될 경우, 해당 PCID와 연결된 CCP 내의 모든 서명된 계약 데이터는 본 API와 동일하게 시스템에 의해 자동으로 삭제(Cleansing)됩니다.
+      - PCP에서 특정 차량의 Provisioning 인증서가 삭제될 경우, 해당 PCID와 연결된 CCP 내의 모든 서명된 계약 데이터는 본 API와 동일하게 시스템에 의해 자동으로 삭제됩니다.
       - 본 API 호출 후에도 인증서 자체는 폐지되지 않았으므로, 동일한 인증서 번들로 다시 서명하여 게시할 수 있습니다.
     security:
       - mTLS_Auth: []
@@ -307,7 +308,7 @@
     operationId: getSignedContractDataByEmaidAndPcidV1
     description: |
       특정 eMAID와 PCID의 조합으로 서명된 계약 데이터를 조회합니다.
-      주로 OEM 백엔드가 자사 차량(PCID)에 할당된 특정 사용자의 계약을 서버 간 통신(S2S)을 통해 가져올 때 사용합니다.
+      주로 OEM 백엔드가 자사 차량(PCID)에 할당된 특정 사용자의 계약을 서버 간 통신을 통해 가져올 때 사용합니다.
 
       **복합 식별자({emaid}/{pcid}) 사용 사유:**
       ISO 15118 표준에서 '서명된 계약 데이터(EXI)'는 단순히 계약(eMAID)의 상태 정보가 아니라, 해당 계약을 설치할 **특정 차량(PCID)의 Provisioning 인증서로 암호화**되어 생성된 물리적 데이터 덩어리입니다. 
@@ -318,8 +319,6 @@
       ISO 15118-2 환경에서는 일반적으로 조건에 부합하는 1건의 데이터만 배열에 포함되어 반환됩니다.
 
       요청 시 'sessionId' 파라미터를 제공하면, 반환되는 EXI 응답 내에 해당 세션 ID가 포함되어 차량과의 보안 세션 연결을 보장할 수 있습니다.
-      이 API는 차량 제조사가 사용자의 요청에 따라 계약 데이터를 사전 다운로드(Push model)할 때 핵심적인 역할을 수행합니다.
-      보안을 위해 eMAID와 PCID의 소유권 및 매핑 관계를 엄격히 검증합니다.
 
     security:
       - mTLS_Auth: []
