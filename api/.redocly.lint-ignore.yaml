@@ -7,3 +7,6 @@ components/schemas/index.yaml:
   no-unused-components:
     - '#/WebhookEventV1'
     - '#/EvseIdV1'
+components/parameters/index.yaml:
+  no-unused-components:
+    - '#/KPNC-Signature'

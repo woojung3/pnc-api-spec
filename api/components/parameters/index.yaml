@@ -44,3 +44,16 @@ limit:
   name: limit
   in: query
   schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+KPNC-Signature:
+  name: KPNC-Signature
+  in: header
+  required: true
+  schema: { type: string }
+  description: |
+    수신한 Webhook 요청의 본문 데이터 무결성을 검증하기 위한 HMAC-SHA256 디지털 서명값입니다.
+
+    - **검증 로직**
+    - **해시 알고리즘:** HMAC-SHA256
+    - **비밀키:** 해당 Webhook 엔드포인트 등록 시 발급된 `secret` 키
+    - **대상 데이터:** 수신된 HTTP POST Body 문자열 전체 (UTF-8 인코딩)
+    - **검증 방식:** 수신한 바디 전체와 `secret`을 기반으로 생성한 해시값과 본 헤더의 값이 완전히 일치하는지 검증

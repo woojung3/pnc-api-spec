@@ -17,6 +17,7 @@ yarn-error.log*
 # Redocly outputs
 api/index.html
 api/openapi.bundled.yaml
+dist/
 
 # Widdershins outputs
 api/openapi.md

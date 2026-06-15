@@ -381,6 +381,10 @@ tags:
 paths:
   $ref: './paths/index.yaml'
 
+x-webhooks:
+  pncEventReceived:
+    $ref: './paths/webhooks.yaml#/pncEventReceived'
+
 components:
   securitySchemes:
     $ref: './components/securitySchemes/index.yaml'
