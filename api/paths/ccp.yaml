@@ -12,6 +12,10 @@
       반환되는 데이터는 JSON 형식의 메타데이터이며, 실시간 계약 설치(CertificateInstallation) 과정에서 필요한 EXI 바이너리 덩어리가 아닙니다.
 
       실시간 계약 설치 과정이나 차량 Push용 데이터가 필요한 경우 본 API 대신 **Protocol API**(`POST /ccp/signed-contract-data` 또는 `GET /ccp/signed-contract-data/{emaid}/{pcid}`)를 사용해야 합니다.
+
+      **[반환 대상 및 상태값 정책]**
+      - 본 API는 **현재 유효한(Valid) 계약 데이터만 반환**합니다. 폐기(Revoked)/만료(Expired)/삭제(Deleted)된 계약은 CCP에서 제거되므로 조회 결과에 포함되지 않습니다.
+      - 계약 인증서 본문(`contractCertificate`)은 제공하지 않으며, 유효기간 등 메타데이터만 제공합니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []
@@ -84,6 +88,10 @@
       **[역할 및 용도 분리: 관리용 API]**
       본 API는 관리용 메타데이터 조회를 위한 인터페이스입니다.
       ISO 15118의 계약 발급 및 설치 과정에서 차량-계약 매핑 상태를 확인하는 API입니다.
+
+      **[반환 대상 및 상태값 정책]**
+      - 본 API는 **현재 유효한(Valid) 계약 데이터만 반환**합니다. 폐기(Revoked)/만료(Expired)/삭제(Deleted)된 계약은 조회 결과에 포함되지 않습니다.
+      - 계약 인증서 본문(`contractCertificate`)은 제공하지 않으며, 유효기간 등 메타데이터만 제공합니다.
     security:
       - mTLS_Auth: []
       - OAuth2_Auth: []
