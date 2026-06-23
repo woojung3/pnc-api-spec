@@ -91,13 +91,23 @@
         application/json:
           schema: { $ref: '../components/schemas/index.yaml#/PostEndpointReqV1' }
           examples:
+            # [2026-06-23 회의 합의] actor별 필터 사용법을 명확히 하기 위해 OEM/eMSP 예시를 분리 제공함.
             OEM_Integration:
-              summary: "OEM용 계약 생성 알림 등록"
+              summary: "OEM용 계약 생성 알림 등록 (WMI 필터)"
+              description: "OEM은 자사 차량(WMI)에서 발생한 이벤트만 수신하도록 wmiList로 필터링한다. 여러 엔드포인트에 WMI를 분산 등록할 수 있다."
               value:
                 url: "https://api.oem-backend.kr/v1/webhooks/pnc"
                 enabledEvents: ["contract.created.for.oem", "contract.updated.for.oem"]
                 wmiList: ["KNA", "KHL"]
                 description: "신규 계약 발생 시 OEM 백엔드로 즉시 알림"
+            EMSP_Integration:
+              summary: "eMSP용 계약 알림 등록 (Provider ID 필터)"
+              description: "eMSP는 자사 Provider ID로 발생한 이벤트만 수신하도록 providerIdList로 필터링한다. (OEM의 wmiList와 달리 eMSP는 providerIdList를 사용)"
+              value:
+                url: "https://api.emsp-backend.kr/v1/webhooks/pnc"
+                enabledEvents: ["contract.created.for.oem", "contract.deleted.for.oem"]
+                providerIdList: ["KHL"]
+                description: "자사 Provider ID 계약 이벤트 수신"
     responses:
       '201':
         description: "Webhook 엔드포인트가 성공적으로 등록되었습니다."

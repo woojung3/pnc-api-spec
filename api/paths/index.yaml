@@ -12,6 +12,9 @@
   $ref: './pcp.yaml#/~1pcp~1certificates~1{pcid}'
 /pcp/lookup-vehicle/{pcid}:
   $ref: './pcp.yaml#/~1pcp~1lookup-vehicle~1{pcid}'
+# [2026-06-23 회의 합의] OCSP 미지원 OEM용으로 CRL 업로드 인터페이스 추가
+/pcp/crl:
+  $ref: './pcp.yaml#/~1pcp~1crl'
 
 /cps/contract-data/sign:
   $ref: './cps.yaml#/~1cps~1contract-data~1sign'
