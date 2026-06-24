@@ -40,9 +40,9 @@ EvseIdV1:
     `<Country Code> <S> <EVSE Operator ID> <S> <ID Type> <EVSE ID>`
     - 예시: `KR*PNP*E12345678` (S는 선택적 구분자 `*`)
 
-    > **[논의중 / 정의 필요]** 발급 인증서 CN(`EnrollmentResponseV1.commonName`)과의 표기 일관성(구분자 `*` 사용 여부 등)은 현재 미확정 상태이며 별도 정의가 필요함. 본 예시는 가안임.
+    > **[논의중 / 정의 필요]** EVSEID의 구체적 표기 규칙(구분자 `*` 사용 여부 등)은 현재 미확정 상태이며 별도 정의가 필요함. 본 예시는 가안임.
 PartyTypeV1: { type: string, enum: [oem, emsp, cpo, cps, pki, pcp, ccp, operator] }
-PkiTypeV1: { type: string, enum: [v2g, oem, emsp, pe] }
+PkiTypeV1: { type: string, enum: [v2g, oem, emsp] }
 XsdMsgDefNamespaceV1: { type: string, enum: ["urn:iso:15118:2:2013:MsgDef", "urn:iso:15118:20:2020:MsgDef"] }
 
 CertificateChainV1:
@@ -413,8 +413,8 @@ ManagedContractRequestV1:
 
 ManagedContractResponseV1:
   type: object
-  description: "계약 발급 및 등록 대행 결과입니다. 인증서 상태는 OCSP 규격을 따릅니다."
-  required: [pcid, emaid, certificateSerialNumber, status, certificateValidFrom, certificateValidTo]
+  description: "계약 발급 및 등록 대행 결과입니다."
+  required: [pcid, emaid, certificateSerialNumber, certificateValidFrom, certificateValidTo]
   properties:
     pcid: { $ref: '#/PcidV1' }
     emaid: { $ref: '#/EmaidV1' }
@@ -422,19 +422,27 @@ ManagedContractResponseV1:
       type: string
       pattern: '^[0-9a-fA-F]+$'
       description: "발급된 계약 인증서의 고유 시리얼 번호(Hex 문자열)입니다."
-    status:
-      type: string
-      enum: [good, revoked, unknown]
-      description: |
-        인증서의 기술적 상태:
-        - `good`: 유효한 인증서
-        - `revoked`: 폐지된 인증서
-        - `unknown`: 시스템에서 인지할 수 없는 인증서
     certificateValidFrom:
       type: string
       format: date-time
       description: "계약 인증서의 유효 시작 일시입니다."
     certificateValidTo: { type: string, format: date-time }
+
+ManagedContractStatusResponseV1:
+  description: "계약 인증서의 상태 조회 결과입니다. 인증서 상태는 OCSP 규격을 따릅니다."
+  allOf:
+    - $ref: '#/ManagedContractResponseV1'
+    - type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [good, revoked, unknown]
+          description: |
+            인증서의 기술적 상태:
+            - `good`: 유효한 인증서
+            - `revoked`: 폐지된 인증서
+            - `unknown`: 시스템에서 인지할 수 없는 인증서
 
 Pagination:
   type: object
@@ -508,15 +516,9 @@ EnrollmentRequestV1:
 
 EnrollmentResponseV1:
   type: object
-  required: [commonName, certificateSerialNumber, certificate, certificateChain]
+  required: [certificateSerialNumber, certificate, certificateChain]
   description: "인증서 발급 결과를 담은 JSON 응답 스키마입니다."
   properties:
-    commonName:
-      type: string
-      description: |
-        발급된 인증서의 Common Name 필드 값입니다 (CPO의 경우 evseID).
-
-        > **[논의중 / 정의 필요]** 발급 CN의 구체적 포맷(EVSEID 표기 규칙, 구분자 사용 여부 등)은 현재 미확정 상태이며 별도 정의가 필요함. 본 예시는 가안임.
     certificateSerialNumber:
       type: string
       pattern: '^[0-9a-fA-F]+$'

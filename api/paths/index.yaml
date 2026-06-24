@@ -34,8 +34,8 @@
 
 /pki/certificates:
   $ref: './pki.yaml#/~1pki~1certificates'
-/pki/certificates/{caDomain}/{certificateSerialNumber}:
-  $ref: './pki.yaml#/~1pki~1certificates~1{caDomain}~1{certificateSerialNumber}'
+/pki/certificates/{certificateSerialNumber}:
+  $ref: './pki.yaml#/~1pki~1certificates~1{certificateSerialNumber}'
 
 /event/endpoints:
   $ref: './event.yaml#/~1event~1endpoints'

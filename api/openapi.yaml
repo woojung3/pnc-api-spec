@@ -273,7 +273,7 @@ info:
     | **CPS** | [계약 데이터 CPS 서명](#operation/signContractDataV1) | 쓰기 | ❌ | ❌ | ✅ | ❌ | ❌ |
     | **CCP** | [CertInstReq 기반 검색](#operation/lookupSignedContractDataByReqV1) | 읽기 | ❌ | ✅ | ❌ | ❌ | ❌ |
     | **CCP** | [계약 게시 철회](#operation/deleteSignedContractDataByEmaidV1) | 삭제 | ❌ | ❌ | ✅ | ❌ | ✅ |
-    | **CCP** | [eMAID 기준 계약 조회](#operation/getContractDataByEmaidV1) | 읽기 | ✅ | ✅ | ✅ | ❌ | ✅ |
+    | **CCP** | [eMAID 기준 계약 조회](#operation/getContractDataByEmaidV1) | 읽기 | ✅ | ❌ | ✅ | ❌ | ✅ |
     | **CCP** | [PCID 기준 계약 조회](#operation/getContractDataByPcidV1) | 읽기 | ✅ | ❌ | ❌ | ❌ | ✅ |
     | **CCP** | [서명된 계약 단건 조회](#operation/getSignedContractDataByEmaidAndPcidV1) | 읽기 | ✅ | ❌ | ❌ | ❌ | ✅ |
     | **CPO** | [Leaf 인증서 발급](#operation/enrollCertificateV1) | 쓰기 | ❌ | ✅ | ❌ | ❌ | ✅ |

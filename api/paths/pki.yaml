@@ -57,14 +57,14 @@
               "certificateSigningRequest": "MIIB...[Base64 CSR]..."
             }'
 
-/pki/certificates/{caDomain}/{certificateSerialNumber}:
+/pki/certificates/{certificateSerialNumber}:
   delete:
     tags: ["PKI (Public Key Infrastructure)"]
     summary: 인증서 폐지 요청
     operationId: revokeCertV1
     description: |
       보안 사고, 키 탈취, 혹은 서비스 종료 등의 사유로 인해 기 발급된 인증서를 유효 기간 만료 전에 강제로 폐지합니다.
-      대상 인증서가 속한 PKI 도메인과 고유 시리얼 번호를 식별자로 사용합니다.
+      폐지 대상은 고유 시리얼 번호로 식별합니다. 인증서가 속한 PKI 도메인(caDomain)은 별도로 전달하지 않으며, 인증된 요청자의 권한 범위에서 자동으로 결정됩니다. 따라서 요청자는 자신이 권한을 가진 도메인의 인증서만 폐지할 수 있습니다. (시리얼 번호는 시스템 전역에서 유일하게 발급됩니다.)
       요청이 수락되면 해당 인증서는 OCSP 응답 상태가 'Revoked'로 변경됩니다.
       한번 폐지된 인증서는 결코 다시 활성화될 수 없으며, 이후 모든 PnC 통신에서 거부됩니다.
       시스템 무결성 유지를 위해 해당 인증서의 소유 권한을 가진 CPO 또는 최고 관리자(Trust Operator)만 호출 가능합니다.
@@ -75,13 +75,6 @@
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
       - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
-      - name: caDomain
-        in: path
-        required: true
-        description: "인증서가 속한 PKI 도메인 식별자입니다."
-        schema:
-          type: string
-          enum: [v2g, oem, emsp, cpo, cps, veh]
       - name: certificateSerialNumber
         in: path
         required: true
@@ -123,6 +116,6 @@
       - lang: 'cURL'
         label: 'Revoke Certificate'
         source: |
-          curl -X DELETE "https://api.kpnc-protocol.kr/v1/pki/certificates/cpo/1234abcd?revocationReason=keyCompromise" \
+          curl -X DELETE "https://api.kpnc-protocol.kr/v1/pki/certificates/1234abcd?revocationReason=keyCompromise" \
             -H "KPNC-From-Party-Type: cpo" \
             -H "KPNC-From-Party-Id: KR-CPO-01"

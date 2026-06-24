@@ -19,7 +19,7 @@
       - name: pkiType
         in: query
         required: false
-        description: "ISO 15118에 정의된 PKI 계층 구조 유형 필터입니다. (v2g: 인프라 공통, oem: 제조사, emsp: 계약 서비스, pe: 공개 기업용)"
+        description: "ISO 15118에 정의된 PKI 계층 구조 유형 필터입니다. (v2g: 인프라 공통, oem: 제조사, emsp: 계약 서비스)"
         schema:
           $ref: '../components/schemas/index.yaml#/PkiTypeV1'
       - name: fingerprint
