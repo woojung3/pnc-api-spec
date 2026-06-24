@@ -132,8 +132,8 @@
             -H "Content-Type: application/json" \
             -d '{
               "caCertificate": "MIIC...[Base64 DER]...",
-              "rootTypeList": ["v2g"],
-              "rootAuthorityKeyIdentifier": "74:61:..." 
+              "rootType": "v2g",
+              "rootAuthorityKeyIdentifier": "74:61:..."
             }'
 
 /rcp/certificates/{rootCertificateId}:

@@ -36,8 +36,6 @@
         in: query
         description: "특정 V2G Root를 신뢰 앵커로 하는 CPS에 의해 서명된 계약만 필터링할 때 사용하는 SHA-256 지문입니다. 차량이 신뢰하는 Root 지문과 대조하여 유효한 계약을 필터링할 수 있습니다."
         schema: { type: string, pattern: '^[0-9a-fA-F]{64}$' }
-      - $ref: '../components/parameters/index.yaml#/offset'
-      - $ref: '../components/parameters/index.yaml#/limit'
     responses:
       '200':
         description: "계약 정보 조회가 성공적으로 완료되었습니다. 결과가 없는 경우 빈 목록이 반환됩니다."
@@ -46,9 +44,7 @@
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '../components/schemas/index.yaml#/Pagination'
-                - $ref: '../components/schemas/index.yaml#/ContractDataCollectionV1'
+              $ref: '../components/schemas/index.yaml#/ContractDataCollectionV1'
       '400': 
         description: "잘못된 파라미터 요청입니다. eMAID 형식이 올바르지 않거나 필수 헤더가 누락된 경우 발생합니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
@@ -174,7 +170,7 @@
         application/json:
           schema:
             type: object
-            required: [certificateInstallationReq, xsdMsgDefNamespace, providerId]
+            required: [certificateInstallationReq, xsdMsgDefNamespace]
             properties:
               certificateInstallationReq: 
                 type: string
@@ -185,8 +181,6 @@
                   - **표준 참조:** ISO 15118-2/20 `certificateInstallationReq`
               xsdMsgDefNamespace: 
                 $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1'
-              providerId:
-                $ref: '../components/schemas/index.yaml#/ProviderIdV1'
               metadata: 
                 type: string
                 description: "조회 요청과 관련된 추가 메타데이터입니다 (Optional)."
@@ -227,8 +221,7 @@
             -H "Content-Type: application/json" \
             -d '{
               "certificateInstallationReq": "gJgA...", 
-              "xsdMsgDefNamespace": "urn:iso:15118:20:2020:MsgDef",
-              "providerId": "KHL"
+              "xsdMsgDefNamespace": "urn:iso:15118:20:2020:MsgDef"
             }'
       - lang: 'cURL'
         label: 'Invalid EXI Error'
@@ -240,8 +233,7 @@
             -H "Content-Type: application/json" \
             -d '{
               "certificateInstallationReq": "INVALID", 
-              "xsdMsgDefNamespace": "urn:iso:15118:2:2013:MsgDef",
-              "providerId": "KHL"
+              "xsdMsgDefNamespace": "urn:iso:15118:2:2013:MsgDef"
             }'
 
 /ccp/signed-contract-data/{emaid}:

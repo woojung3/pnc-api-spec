@@ -1,73 +1,10 @@
-/pki/ca-certificates:
-  get:
-    tags: ["PKI (Public Key Infrastructure)"]
-    summary: CA 인증서 체인 조회
-    operationId: getCaCertsV1
-    description: |
-      특정 도메인의 CA 인증서 체인(Root 및 Sub CA)을 조회합니다.
-      클라이언트(eMSP, CPO, OEM 등)는 본 API를 통해 확보한 신뢰 체계를 바탕으로 시스템 간 신뢰 관계를 설정하고, 향후 발급받을 인증서의 경로 검증에 활용합니다.
-      응답은 구조화된 JSON 형식을 따르며, 인증서 데이터는 Base64 DER로 인코딩됩니다.
-
-      **[인증서 체인 정렬 정책]**
-      반환되는 `certificateChain` 배열은 반드시 **Bottom-to-Top** 순서를 따릅니다.
-    security:
-      - mTLS_Auth: []
-      - OAuth2_Auth: []
-    parameters:
-      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
-      - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
-      - $ref: '../components/parameters/index.yaml#/KPNC-Trace-Id'
-      - name: caDomain
-        in: query
-        required: true
-        description: "인증서가 관리되는 PKI 도메인 식별자입니다."
-        schema:
-          type: string
-          enum: [v2g, oem, emsp, cpo, cps, veh]
-      - name: iso15118Version
-        in: query
-        required: true
-        description: "대상 ISO 15118 규격 버전 네임스페이스입니다."
-        schema:
-          $ref: '../components/schemas/index.yaml#/XsdMsgDefNamespaceV1'
-    responses:
-      '200':
-        description: "CA 인증서 체인이 성공적으로 조회되었습니다."
-        headers:
-          KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/index.yaml#/CaCertificateChainResponseV1'
-      '400': 
-        description: "잘못된 도메인 또는 버전 요청입니다."
-        $ref: '../components/responses/index.yaml#/BadRequest'
-      '401': 
-        description: "인증 실패입니다."
-        $ref: '../components/responses/index.yaml#/Unauthorized'
-      '403': 
-        description: "해당 PKI 도메인에 대한 접근 권한이 없습니다."
-        $ref: '../components/responses/index.yaml#/Forbidden'
-      '429':
-        $ref: '../components/responses/index.yaml#/TooManyRequests'
-      '500': 
-        description: "PKI 서비스 내부 장애입니다."
-        $ref: '../components/responses/index.yaml#/InternalServerError'
-    x-codeSamples:
-      - lang: 'cURL'
-        label: 'Fetch CA Chain'
-        source: |
-          curl -X GET "https://api.kpnc-protocol.kr/v1/pki/ca-certificates?caDomain=emsp&iso15118Version=urn:iso:15118:2:2013:MsgDef" \
-            -H "KPNC-From-Party-Type: emsp" \
-            -H "KPNC-From-Party-Id: KR-EMSP-EMSP01"
-
 /pki/certificates:
   post:
     tags: ["PKI (Public Key Infrastructure)"]
-    summary: 클라이언트 인증서 발급
+    summary: Leaf 인증서 발급
     operationId: enrollCertificateV1
     description: |
-      사용자로부터 JSON 래핑된 CSR(PKCS#10)을 전달받아 새로운 클라이언트(Leaf) 인증서를 발급합니다. 
+      사용자로부터 JSON 래핑된 CSR(PKCS#10)을 전달받아 새로운 Leaf 인증서를 발급합니다. 
       본 엔드포인트는 신규 발급에만 사용됩니다. 갱신 대신 신규 발급을 이용해야 합니다.
 
       **[인증서 체인 구성 가이드]**
