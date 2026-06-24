@@ -1,26 +1,12 @@
-mTLS_Auth:
-  type: http
-  scheme: mutual
-  description: |
-    **[검토안 1] mTLS 기반 상호 인증 (Mutual TLS)**
-    
-    인프라 및 전송 계층에서의 강력한 보안 확보를 위한 mTLS 인증 방식입니다. 
-    본 방식이 최종 채택될 경우, 다음의 연동 규격이 적용될 예정입니다.
-
-    **[연동 및 검증 로직(안)]**
-    1. **Identity Linkage:** 클라이언트 인증서의 `Subject (Common Name)` 또는 `Subject Alternative Name (SAN)`에 포함된 식별 정보가 요청 헤더의 `KPNC-From-Party-Id`와 일치하는지 게이트웨이 또는 애플리케이션 계층에서 교차 검증합니다.
-    2. **인증서 정책:** 국가 V2G PKI 또는 사전에 합의된 신뢰 체계(Trust Anchor)에 의해 발급된 인증서만 수용됩니다.
-    3. **상태 확인:** 실시간 OCSP 조회를 통해 인증서의 폐지 여부를 검증합니다.
-
 OAuth2_Auth:
   type: oauth2
   description: |
-    **[검토안 2] OAuth2 기반 토큰 인증 (Client Credentials Flow)**
+    **OAuth2 기반 토큰 인증 (Client Credentials Flow)**
     
     세부적인 역할 기반 접근 제어(RBAC)와 확장성을 고려한 JWT 토큰 인증 방식입니다. 
-    본 방식이 최종 채택될 경우, '서비스별 접근 권한 매핑 표'에 정의된 권한에 따라 다음 Scopes가 부여됩니다.
+    '서비스별 접근 권한 매핑 표'에 정의된 권한에 따라 다음 Scopes가 부여됩니다.
 
-    **[연동 및 검증 로직(안)]**
+    **[연동 및 검증 로직]**
     1. **Identity Linkage:** JWT의 `sub` (Subject) 클레임 또는 별도로 정의된 커스텀 클레임(`party_id`) 값이 요청 헤더의 `KPNC-From-Party-Id`와 일치해야 합니다. 불일치 시 타인 사칭으로 간주합니다.
     2. **Scope-based Control:** 토큰 내에 포함된 `scopes`를 통해 API 서비스 도메인별 접근 권한을 제어합니다.
 

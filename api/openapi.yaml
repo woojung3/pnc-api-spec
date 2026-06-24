@@ -228,13 +228,11 @@ info:
 
     ---
 
-    # 4. 인증 및 권한 정책 (검토안)
+    # 4. 인증 및 권한 정책
 
-    본 시스템의 보안 체계는 국가 PnC 인프라의 요구사항에 따라 지속적으로 검토 중입니다. 현재 논의 중인 기술적 대안들과 `KPNC-From-Party-*` 헤더와의 연계 방안을 아래와 같이 명세합니다.
+    본 시스템의 보안 체계 및 `KPNC-From-Party-*` 헤더와의 연계 방안을 아래와 같이 명세합니다.
 
     ### 4.1 인증 기술
-    <!-- [2026-06-23 회의 합의] 인증 방식을 OAuth2(JWT/Client Credentials)로 채택하고, 기존 '옵션 1/옵션 2' 후보 비교 서술을 제거함.
-         토큰 발급 서버는 아우토크립트가 구축·운영하여 발행한다. (mTLS 정의는 인프라 병행 가능성을 위해 securitySchemes에 보존하나 기본 채택안은 OAuth2임) -->
     본 시스템의 API 인증은 **OAuth2 (JWT / Client Credentials)** 방식을 채택합니다.
     - **특징:** 토큰 기반의 유연한 권한 관리. 세부 권한(Scope) 제어가 용이하며, 클라우드 네이티브 환경에 최적화됨.
     - **토큰 발급:** 인증 서버 및 토큰 발급 서버를 통해 발행되며, 각 연동 주체는 발급받은 토큰으로 API를 호출합니다.
@@ -338,7 +336,6 @@ servers:
     description: Korean PnC PKI Production Environment
 
 security:
-  - mTLS_Auth: []
   - OAuth2_Auth: []
 
 tags:

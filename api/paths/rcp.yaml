@@ -10,7 +10,6 @@
       특정 PKI 유형(V2G, OEM 등)이나 인증서 핑거프린트를 사용한 정밀 필터링 기능을 지원합니다.
       조회된 인증서는 Base64 DER 형식으로 제공되며, 시스템의 신뢰 저장소 업데이트에 활용됩니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -84,7 +83,6 @@
       등록 시 인증서의 유효 기간, DN(Distinguished Name), 신뢰 수준 등을 엄격히 검증합니다.
       보안 사고 예방을 위해 모든 변경 이력은 감사 로그로 영구 저장됩니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: ["trust-operator"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -147,7 +145,6 @@
       신뢰 목록 동기화 과정에서 특정 인증서의 변경 사항만 확인하고자 할 때 효율적입니다.
       반환 데이터에는 인증서의 지문(Fingerprint), 유효 기간, 발급자 정보 등이 상세히 포함됩니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -202,7 +199,6 @@
       본 엔드포인트는 Trust Operator 전용이며, 인증서가 만료되었거나 보안상의 이유로 더 이상 신뢰해서는 안 되는 경우 호출합니다.
       등록 해제된 Root는 이후 모든 CPO 및 OEM의 조회 목록에서 제외되며, 해당 Root를 신뢰 앵커로 하여 발급된 하위 인증서(CPS 등)들은 더 이상 유효하게 처리되지 않을 수 있습니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: ["trust-operator"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'

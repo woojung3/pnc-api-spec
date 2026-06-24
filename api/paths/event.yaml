@@ -9,7 +9,6 @@
 
       *참고: 웹훅 엔드포인트는 한 사업자당 등록 개수가 소수로 제한되므로(일반적으로 10개 미만), 시스템 일관성보다는 관리 편의를 위해 페이징(Pagination) 없이 전체 목록을 반환합니다.*
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -79,7 +78,6 @@
 
       *참고: 각 이벤트 발생 시 수신하게 될 상세 페이로드 구조는 OpenAPI 스펙의 `WebhookEventV1` 스키마를 참조하십시오.*
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -153,7 +151,6 @@
       특정 Webhook 엔드포인트의 설정 상태 및 `secret`을 확인합니다.
       `secret`은 Webhook 메시지 수신 시 무결성 검증을 위한 HMAC 키로 사용되므로, 보안을 위해 안전한 곳에 저장하십시오.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -198,7 +195,6 @@
       엔드포인트의 URL, 수신 이벤트 목록, 또는 활성화 상태(`status`)를 변경합니다.
       시스템 점검 등으로 일시적으로 알림을 중단하려면 `status`를 `disabled`로 수정하십시오.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -248,7 +244,6 @@
       Webhook 엔드포인트를 영구적으로 제거합니다.
       삭제 후에는 해당 URL로 더 이상 이벤트 알림이 전송되지 않으며, 이 작업은 복구할 수 없습니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'

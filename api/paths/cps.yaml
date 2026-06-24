@@ -12,7 +12,6 @@
 
       본 API의 성공 응답(`201 Created`)은 V2G 서명 완료와 CCP 내 물리적 저장 및 배포 준비가 하나의 트랜잭션으로 완료됨을 보장합니다. 따라서 호출자는 별도의 정합성 검증이나 추가 저장 요청 없이 즉시 CCP를 통해 계약 조회가 가능합니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -83,7 +82,6 @@
       확보된 체인 정보는 ISO 15118 CertificateInstallationRes 메시지 구성 시 'CPS Certificate Chain' 필드에 포함되어 차량에 전달됩니다.
       보안 정책에 따라 CPS 인증서는 정기적으로 갱신될 수 있으므로, 주기적인 동기화가 권고됩니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'

@@ -23,7 +23,6 @@
       **[응답 처리 정책]**
       본 API는 신규 등록(Create)과 기존 데이터 갱신(Update)을 구분하지 않는 Upsert 패턴을 따르며, 성공 시 **200 OK**를 반환합니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -92,7 +91,6 @@
       eMSP 백엔드가 사용자에게 새로운 충전 계약을 발급할 때, 차량의 Provisioning 인증서를 획득하여 계약 데이터를 암호화하기 위해 사용합니다.
       조회 결과에는 리프 인증서뿐만 아니라 상위 Sub CA 체인이 포함되어 있어, ISO 15118-2/20 규격에 따른 인증서 설치 패키지 구성이 가능합니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -149,7 +147,6 @@
       차량의 폐기, 번호판 변경, 혹은 보안 사고로 인한 인증서 무효화 시 PCP에서 해당 정보를 영구 삭제합니다.
       주로 OEM이 차량의 생애 주기 종료를 시스템에 알릴 때 호출하며, 이후 해당 PCID로는 더 이상 PnC 서비스를 이용할 수 없습니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -200,7 +197,6 @@
 
       응답 바디 없이 HTTP 상태 코드로 결과(200 OK 또는 404 Not Found)를 전달합니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
@@ -258,7 +254,6 @@
       - 업로드 주체(OEM)는 요청 헤더(`KPNC-From-Party-*`)로 식별하며, 별도의 식별자를 본문에 넣지 않습니다. CRL이 적용되는 발급 CA(issuer)는 CRL 본문에 포함된 Issuer/AKI 정보로 식별하고, 해당 CA가 요청 OEM 앞으로 등록된 것인지(서명 검증 포함) 권한을 확인합니다.
       - 본 인터페이스의 실제 구현은 2026-12-31까지 유예됩니다.
     security:
-      - mTLS_Auth: []
       - OAuth2_Auth: []
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
