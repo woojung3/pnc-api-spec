@@ -47,8 +47,7 @@ OAuth2_Auth:
         emsp:managed: "위임 관리 모델 기반 계약 발급/상태조회/해지 권한 (eMSP)"
         
         # PKI Service
-        pki:read: "CA 인증서 체인 조회 권한 (전 사업자)"
-        pki:write: "인증서 발급 및 폐지 요청 권한 (OEM, CPO, eMSP)"
+        pki:write: "인증서 발급 및 폐지 요청 권한 (CPO)"
         
         # Event Service
         event:manage: "Webhook 엔드포인트 관리 권한 (전 사업자)"

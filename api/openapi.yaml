@@ -276,8 +276,8 @@ info:
     | **CCP** | [eMAID 기준 계약 조회](#operation/getContractDataByEmaidV1) | 읽기 | ✅ | ✅ | ✅ | ❌ | ✅ |
     | **CCP** | [PCID 기준 계약 조회](#operation/getContractDataByPcidV1) | 읽기 | ✅ | ❌ | ❌ | ❌ | ✅ |
     | **CCP** | [서명된 계약 단건 조회](#operation/getSignedContractDataByEmaidAndPcidV1) | 읽기 | ✅ | ❌ | ❌ | ❌ | ✅ |
-    | **PKI** | [Leaf 인증서 발급](#operation/enrollCertificateV1) | 쓰기 | ✅ | ✅ | ✅ | ✅ | ✅ |
-    | **PKI** | [인증서 폐지 요청](#operation/revokeCertV1) | 삭제 | ✅ | ✅ | ✅ | ❌ | ✅ |
+    | **CPO** | [Leaf 인증서 발급](#operation/enrollCertificateV1) | 쓰기 | ❌ | ✅ | ❌ | ❌ | ✅ |
+    | **CPO** | [인증서 폐지 요청](#operation/revokeCertV1) | 삭제 | ❌ | ✅ | ❌ | ❌ | ✅ |
     | **EVENT** | [Webhook 목록 조회](#operation/getWebhookEndpointsV1) | 읽기 | ✅ | ✅ | ✅ | ✅ | ✅ |
     | **EVENT** | [Webhook 등록](#operation/postEndpointV1) | 쓰기 | ✅ | ✅ | ✅ | ✅ | ✅ |
     | **EVENT** | [Webhook 단건 조회](#operation/getWebhookEndpointV1) | 읽기 | ✅ | ✅ | ✅ | ✅ | ✅ |
