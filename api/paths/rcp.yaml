@@ -47,18 +47,14 @@
                       items:
                         $ref: '../components/schemas/index.yaml#/RootCertificateV1'
       '400': 
-        description: "잘못된 쿼리 파라미터 요청입니다. 핑거프린트 형식이 올바르지 않은 경우 발생합니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "해당 리소스에 접근할 권한이 없습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "서버 내부 오류로 목록을 가져오지 못했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -83,7 +79,7 @@
       등록 시 인증서의 유효 기간, DN(Distinguished Name), 신뢰 수준 등을 엄격히 검증합니다.
       보안 사고 예방을 위해 모든 변경 이력은 감사 로그로 영구 저장됩니다.
     security:
-      - OAuth2_Auth: ["trust-operator"]
+      - OAuth2_Auth: ["operator"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
@@ -104,21 +100,16 @@
             schema:
               $ref: '../components/schemas/index.yaml#/RootCertificateV1'
       '400': 
-        description: "잘못된 인증서 형식입니다. Base64 DER 인코딩 여부와 필수 필드를 확인하십시오."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "Trust Operator 권한이 없는 사용자의 등록 시도입니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '409':
-        description: "이미 동일한 인증서가 등록되어 있습니다."
         $ref: '../components/responses/index.yaml#/Conflict'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "데이터베이스 저장 중 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -165,18 +156,14 @@
             schema:
               $ref: '../components/schemas/index.yaml#/RootCertificateV1'
       '400': 
-        description: "잘못된 UUID 형식입니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '404': 
-        description: "지정한 ID에 해당하는 Root 인증서를 찾을 수 없습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "시스템 조회 오류입니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -199,7 +186,7 @@
       본 엔드포인트는 Trust Operator 전용이며, 인증서가 만료되었거나 보안상의 이유로 더 이상 신뢰해서는 안 되는 경우 호출합니다.
       등록 해제된 Root는 이후 모든 CPO 및 OEM의 조회 목록에서 제외되며, 해당 Root를 신뢰 앵커로 하여 발급된 하위 인증서(CPS 등)들은 더 이상 유효하게 처리되지 않을 수 있습니다.
     security:
-      - OAuth2_Auth: ["trust-operator"]
+      - OAuth2_Auth: ["operator"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
@@ -215,18 +202,14 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "Trust Operator 권한 부족입니다. Root 제거는 최고 관리자 권한이 필요합니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
-        description: "제거하려는 Root 인증서 ID가 존재하지 않습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "제거 처리 중 서버 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

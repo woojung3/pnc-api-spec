@@ -55,15 +55,12 @@
               status: 400
               detail: "제공된 PCID의 체크섬이 올바르지 않거나 허용되지 않은 WMI를 포함하고 있습니다."
       '401': 
-        description: "인증 정보가 유효하지 않거나 누락되었습니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "권한 부족입니다. 해당 WMI 범위를 관리할 권한이 없는 OEM의 요청인 경우 발생합니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "PCP 서버 내부 저장소 오류입니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -115,21 +112,16 @@
             schema:
               $ref: '../components/schemas/index.yaml#/ProvisioningCertificateDataV1'
       '400': 
-        description: "PCID 파라미터 형식이 규격에 맞지 않습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "조회 권한이 없거나 차단된 파티의 요청입니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
-        description: "요청한 PCID에 해당하는 인증서가 PCP 내에 등록되어 있지 않습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "데이터 조회 중 시스템 예외가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -163,18 +155,14 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "삭제 권한이 없습니다. 관리자 또는 해당 차량을 등록한 OEM만 요청 가능합니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
-        description: "삭제하려는 PCID 정보가 PCP에 존재하지 않습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "인증서 삭제 처리 중 서버 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -213,21 +201,16 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400': 
-        description: "PCID 형식이 잘못되었습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "조회 권한이 없습니다. CPO 등 허용되지 않은 파티의 요청입니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
-        description: "지정한 PCID를 사용하는 차량이 존재하지 않습니다. eMSP는 사용자에게 차량 등록을 안내해야 합니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "조회 처리 중 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -278,18 +261,14 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400':
-        description: "CRL 형식이 잘못되었거나 필수 필드(thisUpdate/nextUpdate)가 누락되었습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401':
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403':
-        description: "해당 OEM 도메인의 CRL을 등록할 권한이 없습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500':
-        description: "CRL 저장/파싱 중 서버 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

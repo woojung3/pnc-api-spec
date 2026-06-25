@@ -36,15 +36,12 @@
             schema:
               $ref: '../components/schemas/index.yaml#/ManagedContractResponseV1'
       '400':
-        description: "잘못된 요청입니다. PCID/eMAID 형식이 틀렸거나 유효 기간 설정이 부적절합니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403':
-        description: "권한이 없습니다. 해당 eMAID 도메인에 대한 관리 권한을 확인하십시오."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404':
-        description: "대상 차량(PCID)이 PCP에 등록되어 있지 않습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '409':
         description: "이미 해당 eMAID로 활성화된 계약이 존재합니다."
@@ -59,7 +56,6 @@
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500':
-        description: "내부 오케스트레이션 처리 중 오류가 발생했습니다 (PKI/CPS/CCP 연동 실패 등)."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -111,19 +107,16 @@
             schema:
               $ref: '../components/schemas/index.yaml#/ManagedContractStatusResponseV1'
       '400':
-        description: "잘못된 요청 파라미터입니다. eMAID 또는 시리얼 번호 형식이 유효하지 않습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403':
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404':
-        description: "해당 eMAID와 시리얼 번호 조합의 계약을 찾을 수 없습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500':
-        description: "조회 처리 중 서버 내부 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -174,15 +167,12 @@
       '401':
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403':
-        description: "권한이 없습니다. 본인이 발급한 계약만 해지할 수 있습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404':
-        description: "해당 eMAID와 시리얼 번호 조합의 계약을 찾을 수 없습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500':
-        description: "폐지 처리 중 PKI 또는 CCP 연동 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

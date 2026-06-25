@@ -25,6 +25,16 @@
 npx @redocly/cli lint api/openapi.yaml --config api/redocly.yaml
 ```
 
+**[참고] 엄격한 표준 규격 및 보안 스코프 검증**
+실제 배포(Production) 전, 타사 도구 체인과의 상호운용성 및 보안 정책(OAuth2 Scope 등)의 엄격한 검증이 필요한 경우 아래 단계를 수행할 수 있음
+
+- **1단계**: 명세 파일 병합 (4번 명령어 참고)
+- **2단계**: 엄격한 Spectral 린팅 실행
+  ```bash
+  npx @stoplight/spectral-cli lint api/openapi.bundled.yaml --ruleset spectral-strict.yaml
+  ```
+
+
 ### 2. 실시간 문서 미리보기
 명세 수정 사항을 브라우저에서 실시간으로 확인합니다.
 ```bash

@@ -39,18 +39,14 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400': 
-        description: "입력된 계약 번들의 형식이 잘못되었거나 서명 검증에 실패했습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "eMSP 권한이 없거나 지정된 Root 사용 권한이 없습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "CPS 내부 서명 모듈 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -106,15 +102,12 @@
                       items:
                         $ref: '../components/schemas/index.yaml#/CpsCertificateChainDataV1'
       '400': 
-        description: "잘못된 요청입니다. 필수 헤더가 누락되었거나 쿼리 파라미터(limit, offset)가 유효하지 않은 경우 발생합니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "데이터 조회 중 서버 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

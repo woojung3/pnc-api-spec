@@ -29,18 +29,14 @@
           application/json:
             schema: { $ref: '../components/schemas/index.yaml#/EnrollmentResponseV1' }
       '400': 
-        description: "제출된 CSR 형식이 잘못되었거나 도메인 정책에 위반되는 요청입니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "지정된 도메인에서 인증서를 발급받을 권한이 없습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "인증서 서명 처리 중 서버 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'
@@ -94,21 +90,16 @@
         headers:
           KPNC-Trace-Id: { $ref: '../components/headers/index.yaml#/TraceIdHeader' }
       '400': 
-        description: "인증서 식별 정보가 부적절하거나 폐지 사유가 명시되지 않았습니다."
         $ref: '../components/responses/index.yaml#/BadRequest'
       '401': 
-        description: "인증 실패입니다."
         $ref: '../components/responses/index.yaml#/Unauthorized'
       '403': 
-        description: "타인의 인증서를 폐지하려고 하거나 폐지 권한이 없습니다."
         $ref: '../components/responses/index.yaml#/Forbidden'
       '404': 
-        description: "폐지하려는 인증서를 PKI 데이터베이스에서 찾을 수 없습니다."
         $ref: '../components/responses/index.yaml#/NotFound'
       '429':
         $ref: '../components/responses/index.yaml#/TooManyRequests'
       '500': 
-        description: "CA 시스템의 업데이트 중 오류가 발생했습니다."
         $ref: '../components/responses/index.yaml#/InternalServerError'
     x-codeSamples:
       - lang: 'cURL'

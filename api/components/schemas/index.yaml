@@ -98,7 +98,6 @@ RootCertificateV1:
         운용 계획이 확정되지 않은 경우를 대비하여 기본값으로 `["No CTL"]`이 할당됩니다.
     rootType:
       $ref: '#/PkiTypeV1'
-      description: "Root 인증서의 PKI 계층 구조 유형입니다."
     rootAuthorityKeyIdentifier: 
       type: string
       pattern: '^([0-9a-fA-F]{2}:)*[0-9a-fA-F]{2}$'
