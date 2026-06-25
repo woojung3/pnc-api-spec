@@ -15,7 +15,7 @@
       
       이 과정을 통해 eMSP는 복잡한 암호 연산을 직접 구현하지 않고 PnC 계약을 발급할 수 있습니다.
     security:
-      - OAuth2_Auth: []
+      - OAuth2_Auth: ["emsp:managed"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
@@ -83,7 +83,7 @@
       eMAID는 재활용될 수 있으므로, 정확한 인증서 인스턴스를 식별하기 위해 시리얼 번호를 함께 사용해야 합니다.
       상태 값은 OCSP 표준 응답 코드(`good`, `revoked`, `unknown`)를 따릅니다.
     security:
-      - OAuth2_Auth: []
+      - OAuth2_Auth: ["emsp:managed"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
@@ -137,7 +137,7 @@
       1. **인증서 폐지**: PKI 시스템에 해당 시리얼 번호 인증서의 폐지(Revocation)를 요청하여 OCSP에 반영
       2. **데이터 영구 삭제**: CCP 저장소에서 관련 서명 데이터를 삭제
     security:
-      - OAuth2_Auth: []
+      - OAuth2_Auth: ["emsp:managed"]
     parameters:
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Type'
       - $ref: '../components/parameters/index.yaml#/KPNC-From-Party-Id'
