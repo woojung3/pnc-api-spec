@@ -287,18 +287,19 @@ info:
     # 5. 속도 제한 정책
     시스템의 안정적인 운영과 공정한 자원 배분을 위해 모든 API 엔드포인트에 대해 다음과 같은 속도 제한이 적용됩니다.
 
-    | 구분 | 제한 수치 | 기준 | 비고 |
+    | 구분 | 제한 수치 | 기준 |
     | :--- | :--- | :--- | :--- |
-    | 전체 API 공통 | 30회 / min | 클라이언트별 (소스 IP / 기기 단위) | 소스 IP 또는 식별 주체 기준 |
+    | **eMSP 서비스:** `POST /emsp/contracts`, `GET/DELETE /emsp/contracts/{emaid}/{certificateSerialNumber}` | 120회 / min | 인증 주체별 (Client ID 등) |
+    | **PCP:** `PUT /pcp/certificates/{pcid}` | 120회 / min | 인증 주체별 (Client ID 등) |
+    | **CPS:** `POST /cps/contract-data/sign`| 120회 / min | 인증 주체별 (Client ID 등) |
+    | **CCP:** `POST /ccp/signed-contract-data`, `GET /ccp/signed-contract-data/{emaid}/{pcid}` | 120회 / min | 인증 주체별 (Client ID 등) |
+    | **기타 API** | 60회 / min | 인증 주체별 (Client ID 등) |
 
-    > 본 제한은 종단 단말에 대한 제한입니다. 개별 기기나 충전기 단위에 대해, 소스 IP 등을 통한 식별로 적용됩니다.
-    > 예를 들어 충전기 1대(1 소스 IP)는 분당 30회까지 호출할 수 있으며, 서로 다른 충전기는 각각 별도의 한도를 가집니다.
-
-    - **제한 방식:** 클라이언트별 단위 시간당 요청 횟수를 제한합니다. 클라이언트 식별은 원활한 연동과 인프라 효율성을 위해 기본적으로 소스 IP(Source IP)를 기준으로 수행합니다. 소스 IP는 통상 개별 기기(충전기 등) 단위에 대응합니다.
+    - **제한 식별 기준:** 모든 제한은 **OAuth2 인증 토큰의 주체(Client ID 또는 Party ID) 단위**로 독립 적용됩니다.
     - **응답 헤더:** 모든 API 응답(성공/실패 포함)에는 다음 헤더가 포함될 수 있습니다.
-      - `KPNC-Rate-Limit-Limit`: 허용된 최대 요청 수
-      - `KPNC-Rate-Limit-Remaining`: 현재 남은 요청 가능 수
-      - `KPNC-Rate-Limit-Reset`: 초기화까지 남은 시간 (초)
+      - `KPNC-Rate-Limit-Limit`: 허용된 최대 요청 수.
+      - `KPNC-Rate-Limit-Remaining`: 현재 남은 요청 가능 수.
+      - `KPNC-Rate-Limit-Reset`: 초기화까지 남은 시간(초).
     - **초과 시 대응:** 제한 초과 시 `429 Too Many Requests` 에러가 반환되며, `Retry-After` 헤더를 통해 재시도 가능 시간을 안내합니다.
 
     > **[Note]**
