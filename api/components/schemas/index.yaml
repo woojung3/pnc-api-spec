@@ -277,7 +277,6 @@ WebhookEndpointResV1:
     url: { type: string, format: uri }
     status: { type: string, enum: [enabled, disabled] }
     enabledEvents: { type: array, items: { $ref: '#/EventEnumV1' } }
-    secret: { type: string, minLength: 1 }
     wmiList:
       type: array
       items: { type: string, pattern: '^[A-Z0-9]{3}$' }
@@ -286,6 +285,20 @@ WebhookEndpointResV1:
       type: array
       items: { $ref: '#/ProviderIdV1' }
       description: "수신할 이벤트를 Provider ID로 필터링합니다. 주로 eMSP가 자사 Provider ID 목록을 지정하는 데 사용합니다."
+
+WebhookEndpointCreatedResV1:
+  description: "Webhook 엔드포인트 등록 성공 시의 응답입니다. 무결성 검증을 위한 `secret` 키를 포함합니다."
+  allOf:
+    - $ref: '#/WebhookEndpointResV1'
+    - type: object
+      required:
+        - secret
+      properties:
+        secret:
+          type: string
+          description: "Webhook 메시지 무결성 검증을 위한 HMAC-SHA256 비밀키입니다. 이 값은 최초 등록 시에만 응답으로 제공되므로, 반드시 안전한 곳에 복사하여 보관해야 합니다."
+          example: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+          minLength: 32
 
 PostEndpointReqV1:
   type: object
