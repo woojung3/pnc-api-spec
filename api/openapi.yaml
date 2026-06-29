@@ -288,7 +288,7 @@ info:
     시스템의 안정적인 운영과 공정한 자원 배분을 위해 모든 API 엔드포인트에 대해 다음과 같은 속도 제한이 적용됩니다.
 
     | 구분 | 제한 수치 | 기준 |
-    | :--- | :--- | :--- | :--- |
+    | :--- | :--- | :--- |
     | **eMSP 서비스:** `POST /emsp/contracts`, `GET/DELETE /emsp/contracts/{emaid}/{certificateSerialNumber}` | 120회 / min | 인증 주체별 (Client ID 등) |
     | **PCP:** `PUT /pcp/certificates/{pcid}` | 120회 / min | 인증 주체별 (Client ID 등) |
     | **CPS:** `POST /cps/contract-data/sign`| 120회 / min | 인증 주체별 (Client ID 등) |
